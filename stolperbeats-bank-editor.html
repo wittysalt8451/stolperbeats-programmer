@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stolperbeats bank editor</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0f0f0f; --panel:#181818; --panel2:#1f1f1f; --line:#2c2c2c;
+  --text:#ececec; --muted:#8c8c8c; --off:#3a3a3a;
+  --kick:#e5332a; --snare:#f27d16; --hh1:#f4f4f4; --hh2:#f8c700; --perc1:#f27d16; --perc2:#e5332a;
+  --ok:#5fbf6a; --warn:#f8c700;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.35;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:#444}
+button:focus-visible,input:focus-visible{outline:2px solid var(--hh2);outline-offset:1px}
+button[aria-pressed="true"]{background:#2b2b2b;border-color:#555}
+.wrap{max-width:1120px;margin:0 auto;padding:16px}
+h1{font-size:22px;letter-spacing:-.02em;margin:0;font-weight:700}
+h1 span{color:var(--muted);font-weight:400}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
+.top .file{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.fileinfo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;width:100%;color:var(--muted)}
+.fileinfo input{width:58px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.fileinfo .fname{color:var(--text);font-weight:700}
+.dirty{color:var(--warn)}
+.primary{background:#2a2a2a;border-color:#4a4a4a;font-weight:700}
+
+/* notice */
+.notice{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--muted);border-radius:6px;
+  padding:8px 36px 8px 12px;margin-bottom:12px;position:relative;white-space:pre-line}
+.notice.ok{border-left-color:var(--ok)}
+.notice.warn{border-left-color:var(--warn)}
+.notice button{position:absolute;right:6px;top:6px;padding:0 7px;line-height:22px}
+
+/* transport */
+.transport{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 22px;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+.play{width:52px;height:52px;border-radius:50%;font-size:20px;padding:0;background:#262626;border-color:#4a4a4a}
+.play.on{background:var(--kick);border-color:var(--kick);color:#fff}
+.tempo{display:flex;align-items:center;gap:6px}
+.tempo input[type=number]{width:62px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 6px;text-align:center}
+.tempo button{padding:5px 10px}
+.tempo input[type=range]{width:120px}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{min-width:34px;padding:6px 8px}
+.seg button[aria-pressed="true"]{background:var(--c,#3a3a3a);border-color:var(--c,#666);color:#111;font-weight:700}
+.shviz{display:flex;gap:10px;margin-top:7px;align-items:center}
+.shviz .half{display:flex;gap:3px}
+.shviz i{width:7px;height:7px;border-radius:50%;background:var(--off);display:block}
+.shviz i.on{background:var(--snare)}
+.shdesc{font-size:12px;color:var(--muted);margin-left:4px}
+.opts{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.opts label{display:flex;flex-direction:column}
+.opts input[type=range]{width:110px}
+#btnLinear[aria-pressed="true"]{background:var(--hh1);border-color:var(--hh1);color:#111;font-weight:700}
+@media (max-width:520px){ .tempo input[type=range]{display:none} .playwrap .lbl{display:none} .transport{gap:12px 18px} }
+
+/* pattern strips */
+.strip{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.strip button{padding:0;height:24px;font-size:10px;border-radius:4px;color:var(--muted);background:var(--bg)}
+.strip button.filled{color:var(--text);background:#262626}
+.strip button.filled::after{content:"";display:block;width:4px;height:4px;border-radius:50%;background:var(--c,#aaa);margin:1px auto 0}
+.strip button.sel{border-color:var(--c,#ddd);box-shadow:inset 0 0 0 1px var(--c,#ddd);color:var(--text)}
+.all{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.all .strip{--c:#ddd}
+@media (min-width:760px){ .all .strip{grid-template-columns:repeat(24,1fr)} }
+
+/* tracks */
+.track{--c:#fff;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;
+  display:grid;grid-template-columns:1fr;gap:8px}
+.track.muted .grid{opacity:.35}
+.thead{display:flex;align-items:center;gap:8px}
+.tname{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;background:none;border:none;padding:2px 2px}
+.tname .led{width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.plabel{color:var(--muted);font-size:12px}
+.spacer{flex:1}
+.ms{padding:3px 9px;font-size:12px;font-weight:700}
+.ms[data-act=mute][aria-pressed="true"]{background:var(--kick);border-color:var(--kick);color:#fff}
+.ms[data-act=solo][aria-pressed="true"]{background:var(--hh2);border-color:var(--hh2);color:#111}
+.tools{display:flex;flex-wrap:wrap;gap:4px}
+.tools button{padding:3px 8px;font-size:12px;color:var(--muted)}
+.tools button:hover{color:var(--text)}
+
+.grid{display:flex;flex-direction:column;gap:5px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grp{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.step{height:26px;padding:0;border:none;border-radius:4px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.step::before{content:"";width:min(15px,72%);aspect-ratio:1;border-radius:50%;background:var(--off)}
+.grp .step:first-child::before{background:#484848}
+.grp .step.on::before{background:var(--c);box-shadow:0 0 7px var(--c)}
+.step.ph{background:#2f2f2f}
+.step.ph::before{outline:2px solid #fff;outline-offset:1px}
+.step:hover{background:#262626}
+
+@media (min-width:860px){
+  .track{grid-template-columns:270px 1fr;column-gap:20px;align-items:start}
+  .thead,.strip,.tools{grid-column:1}
+  .grid{grid-column:2;grid-row:1 / span 3;align-self:center}
+}
+
+footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
+footer p{margin:0 0 6px}
+kbd{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
+.drop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;z-index:10;border:3px dashed var(--hh2)}
+body.dragging .drop{display:flex}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Stolperbeats <span>bank editor</span></h1>
+    <div class="file">
+      <button id="btnOpen" class="primary">Openen</button>
+      <button id="btnSave" class="primary" title="Ctrl/Cmd+S">Opslaan</button>
+      <button id="btnDownload">Downloaden</button>
+      <button id="btnNew">Nieuw</button>
+      <button id="btnUndo" title="Ctrl/Cmd+Z">Ongedaan</button>
+      <input type="file" id="fileInput" accept=".txt,text/plain" hidden>
+    </div>
+    <div class="fileinfo">
+      <label>Bank op module <input id="bankNum" type="number" min="1" max="64" value="5"></label>
+      <span>→ <span class="fname" id="fileName">PatternBank004.txt</span></span>
+      <span class="dirty" id="dirty"></span>
+    </div>
+  </header>
+
+  <div id="notice" class="notice" hidden><span id="noticeText"></span><button id="noticeClose" aria-label="Sluiten">×</button></div>
+
+  <section class="transport">
+    <div class="playwrap"><span class="lbl">&nbsp;</span><button id="btnPlay" class="play" aria-label="Start/stop">▶</button></div>
+    <div>
+      <span class="lbl">Tempo</span>
+      <div class="tempo">
+        <button id="tempoDown" aria-label="Tempo lager">−</button>
+        <input id="tempo" type="number" min="30" max="300" value="90">
+        <button id="tempoUp" aria-label="Tempo hoger">+</button>
+        <input id="tempoRange" type="range" min="30" max="300" value="90" aria-label="Tempo">
+      </div>
+    </div>
+    <div>
+      <span class="lbl">Shuffle</span>
+      <div class="seg" id="shuffleBtns"></div>
+      <div class="shviz" id="shuffleViz"></div>
+    </div>
+    <div>
+      <span class="lbl">Feeling</span>
+      <div class="seg" id="feelBtns"></div>
+    </div>
+    <div class="opts">
+      <div><span class="lbl">&nbsp;</span><button id="btnLinear" aria-pressed="false" title="Snare wint van kick, beide van de hihats">Linear</button></div>
+      <label><span class="lbl">Volume</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.8"></label>
+    </div>
+  </section>
+
+  <section class="all">
+    <span class="lbl">Patroon voor alle tracks</span>
+    <div class="strip" id="allStrip"></div>
+  </section>
+
+  <main id="tracks"></main>
+
+  <footer>
+    <p><b>Preview.</b> Steps vallen op de posities uit de shuffle-weergave in de handleiding, per tel van 4 steps. Dat is een benadering. Timing (Trip/Shake/Push/Clave) zit niet in de preview. Feeling is een benadering: Flam en Slop vertragen kick en snare (Slop ook de hihats), Rolls vervangt Hihat 2 door een burst. Linear volgt de handleiding.</p>
+    <p><b>Op de module.</b> PatternBank004.txt is bank 5. Zet de bank aan in MachineConfig.txt (PATTERNBANK_ACTIVE) of via Bank Edit. Verwissel de SD-kaart alleen met de module uit.</p>
+    <p><b>Sneltoetsen.</b> <kbd>Spatie</kbd> start/stop · <kbd>Ctrl/Cmd+S</kbd> opslaan · <kbd>Ctrl/Cmd+Z</kbd> ongedaan · klik op een tracknaam om het geluid te horen · sleep over steps om meerdere te zetten · sleep een bestand op de pagina om het te openen.</p>
+  </footer>
+</div>
+<div class="drop">Laat los om te openen</div>
+
+<script>
+// @core-start
+const TRACKS = [
+  { id: 'KICK',   name: 'Kick',    len: 64, color: 'var(--kick)'  },
+  { id: 'SNARE',  name: 'Snare',   len: 64, color: 'var(--snare)' },
+  { id: 'HIHAT1', name: 'Hihat 1', len: 16, color: 'var(--hh1)'   },
+  { id: 'HIHAT2', name: 'Hihat 2', len: 16, color: 'var(--hh2)'   },
+  { id: 'PERC1',  name: 'Perc 1',  len: 16, color: 'var(--perc1)' },
+  { id: 'PERC2',  name: 'Perc 2',  len: 16, color: 'var(--perc2)' },
+];
+const TRACK_BY_ID = Object.fromEntries(TRACKS.map(t => [t.id, t]));
+const NPTN = 24;
+
+function emptyBank() {
+  const b = {};
+  for (const t of TRACKS) b[t.id] = Array.from({ length: NPTN }, () => new Uint8Array(t.len));
+  return b;
+}
+
+function parseBank(text) {
+  const bank = emptyBank();
+  const warnings = [];
+  const unknown = [];
+  const seen = new Set();
+  const eol = /\r\n/.test(text) ? '\r\n' : '\n';
+  text.replace(/^﻿/, '').split(/\r?\n/).forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line) return;
+    const m = /^([A-Za-z0-9_]+)\s*>\s*PTN\s*(\d+)\s*:\s*(.*?)\s*;?$/.exec(line);
+    const t = m && TRACK_BY_ID[m[1].toUpperCase()];
+    if (!t) { unknown.push(i + 1); return; }
+    const idx = +m[2];
+    if (idx >= NPTN) { warnings.push(`Regel ${i + 1}: PTN${idx} bestaat niet (max PTN23), overgeslagen.`); return; }
+    const groups = m[3].split(',').map(s => s.trim()).filter(s => s.length);
+    if (groups.some(g => !/^[01]+$/.test(g))) { warnings.push(`Regel ${i + 1}: ongeldige tekens, overgeslagen.`); return; }
+    const bits = groups.join('');
+    if (groups.length !== t.len / 16 || groups.some(g => g.length !== 16)) {
+      warnings.push(`Regel ${i + 1}: ${t.id} PTN${idx} heeft ${bits.length} steps, verwacht ${t.len}. Aangevuld of afgekapt.`);
+    }
+    const arr = bank[t.id][idx];
+    for (let s = 0; s < t.len; s++) arr[s] = bits[s] === '1' ? 1 : 0;
+    seen.add(t.id + ':' + idx);
+  });
+  return { bank, warnings, unknown, found: seen.size, missing: TRACKS.length * NPTN - seen.size, eol };
+}
+
+function serializeBank(bank, eol = '\n') {
+  return TRACKS.map(t => bank[t.id].map((arr, i) => {
+    const groups = [];
+    for (let k = 0; k < t.len; k += 16) groups.push(Array.from(arr.slice(k, k + 16)).join(''));
+    return `${t.id} > PTN${i}: ${groups.join(', ')};`;
+  }).join(eol)).join(eol + eol) + eol;
+}
+
+function bankNumFromName(name) {
+  const m = /PatternBank(\d+)/i.exec(name || '');
+  return m ? +m[1] + 1 : null;
+}
+function nameFromBankNum(n) {
+  return 'PatternBank' + String(n - 1).padStart(3, '0') + '.txt';
+}
+
+// Shuffle-weergave uit de handleiding: per tel van 4 steps, n onderverdelingen, steps op deze posities.
+const SHUFFLES = [
+  { n: 4, pos: [0, 1, 2, 3], d: 'Ongeswingd' },
+  { n: 7, pos: [0, 2, 4, 6], d: 'Laatste step gehaast' },
+  { n: 9, pos: [0, 2, 5, 7], d: 'Gat in het midden' },
+  { n: 5, pos: [0, 1, 3, 4], d: 'Gat in het midden' },
+  { n: 6, pos: [0, 1, 4, 5], d: 'Gat in het midden' },
+  { n: 8, pos: [0, 1, 5, 7], d: 'Haast aan begin en eind' },
+  { n: 9, pos: [0, 1, 6, 8], d: 'Haast aan begin en eind' },
+];
+
+// Welke instrumenten klinken op globale step s (0-63)?
+function hitsAt(bank, sel, s, linear) {
+  const hit = {};
+  for (const t of TRACKS) hit[t.id] = bank[t.id][sel[t.id]][s % t.len] === 1;
+  if (linear) {
+    if (hit.SNARE) hit.KICK = false;
+    if (hit.SNARE || hit.KICK) { hit.HIHAT1 = false; hit.HIHAT2 = false; }
+  }
+  return hit;
+}
+// @core-end
+
+const FEELINGS = [
+  { id: 'tight', name: 'Tight', c: 'var(--snare)' },
+  { id: 'rolls', name: 'Rolls', c: 'var(--kick)' },
+  { id: 'flam',  name: 'Flam',  c: 'var(--hh2)' },
+  { id: 'slop',  name: 'Slop',  c: 'var(--hh1)' },
+];
+
+const $ = s => document.querySelector(s);
+
+// ---------- state ----------
+let bank = emptyBank();
+let eol = '\n';
+let fileName = nameFromBankNum(5);
+let fileHandle = null;
+let dirty = false;
+const sel = Object.fromEntries(TRACKS.map(t => [t.id, 0]));
+const mute = {}, solo = {};
+let shuffle = 0, feeling = 'tight', linear = false, bpm = 90, volume = 0.8;
+let clip = null;
+let undoStack = [];
+
+function setDirty(v) {
+  dirty = v;
+  $('#dirty').textContent = v ? '● niet opgeslagen' : '';
+}
+function pushUndo() {
+  undoStack.push(serializeBank(bank));
+  if (undoStack.length > 200) undoStack.shift();
+}
+function undo() {
+  if (!undoStack.length) { notice('Niets om ongedaan te maken.'); return; }
+  bank = parseBank(undoStack.pop()).bank;
+  renderAll();
+  setDirty(true);
+}
+
+let noticeTimer = null;
+function notice(text, kind = '') {
+  const n = $('#notice');
+  $('#noticeText').textContent = text;
+  n.className = 'notice ' + kind;
+  n.hidden = false;
+  clearTimeout(noticeTimer);
+  if (kind === 'ok' || kind === '') noticeTimer = setTimeout(() => { n.hidden = true; }, 4000);
+}
+$('#noticeClose').onclick = () => { $('#notice').hidden = true; };
+
+// ---------- audio ----------
+let ctx = null, master = null, noiseBuf = null, openHat = null;
+
+function initAudio() {
+  if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -12; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.12;
+  master = ctx.createGain();
+  master.gain.value = volume;
+  master.connect(comp).connect(ctx.destination);
+  noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+
+function envGain(t, peak, dec) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+  return g;
+}
+function noiseSrc(t, dur) {
+  const s = ctx.createBufferSource();
+  s.buffer = noiseBuf;
+  s.start(t, Math.random() * 0.5);
+  s.stop(t + dur);
+  return s;
+}
+function filt(type, freq, q = 0.7) {
+  const f = ctx.createBiquadFilter();
+  f.type = type; f.frequency.value = freq; f.Q.value = q;
+  return f;
+}
+function metal(t, dec, peak, out) {
+  const mix = ctx.createGain(); mix.gain.value = 1.0;
+  for (const f of [205.3, 304.4, 369.6, 522.7, 540, 800]) {
+    const o = ctx.createOscillator();
+    o.type = 'square'; o.frequency.value = f * 1.25;
+    o.connect(mix); o.start(t); o.stop(t + dec + 0.05);
+  }
+  const g = envGain(t, peak, dec);
+  mix.connect(filt('bandpass', 10000, 0.9)).connect(filt('highpass', 7000)).connect(g).connect(out || master);
+  return g;
+}
+function chokeOpenHat(t) {
+  if (openHat && t > openHat.t) {
+    openHat.choke.gain.setTargetAtTime(0, t, 0.006);
+    openHat = null;
+  }
+}
+
+const VOICES = {
+  KICK(t) {
+    const o = ctx.createOscillator();
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(46, t + 0.13);
+    o.connect(envGain(t, 0.85, 0.5)).connect(master);
+    o.start(t); o.stop(t + 0.55);
+    noiseSrc(t, 0.012).connect(filt('highpass', 1500)).connect(envGain(t, 0.25, 0.01)).connect(master);
+  },
+  SNARE(t) {
+    noiseSrc(t, 0.25).connect(filt('bandpass', 1900, 0.6)).connect(envGain(t, 0.9, 0.2)).connect(master);
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(190, t);
+    o.frequency.exponentialRampToValueAtTime(160, t + 0.08);
+    o.connect(envGain(t, 0.55, 0.11)).connect(master);
+    o.start(t); o.stop(t + 0.15);
+  },
+  HIHAT1(t) {
+    chokeOpenHat(t);
+    metal(t, 0.055, 0.5);
+  },
+  HIHAT2(t, dec = 0.38) {
+    chokeOpenHat(t);
+    const choke = ctx.createGain();
+    choke.connect(master);
+    metal(t, dec, 0.45, choke);
+    openHat = { t, choke };
+  },
+  PERC1(t) {
+    const o = ctx.createOscillator();
+    o.frequency.setValueAtTime(340, t);
+    o.frequency.exponentialRampToValueAtTime(255, t + 0.05);
+    o.connect(envGain(t, 0.75, 0.24)).connect(master);
+    o.start(t); o.stop(t + 0.28);
+  },
+  PERC2(t) {
+    const o = ctx.createOscillator();
+    o.type = 'triangle'; o.frequency.value = 1750;
+    o.connect(envGain(t, 0.5, 0.045)).connect(master);
+    o.start(t); o.stop(t + 0.06);
+    noiseSrc(t, 0.04).connect(filt('bandpass', 3500, 1.5)).connect(envGain(t, 0.45, 0.03)).connect(master);
+  },
+};
+
+function audition(id) {
+  initAudio();
+  VOICES[id](ctx.currentTime + 0.01);
+}
+
+// ---------- sequencer ----------
+const LOOKAHEAD = 0.12;
+let playing = false, step = 0, beatTime = 0, timer = null, visQ = [];
+
+function stepTime() {
+  const sh = SHUFFLES[shuffle];
+  return beatTime + sh.pos[step % 4] / sh.n * (60 / bpm);
+}
+
+function playStep(s, t) {
+  const hit = hitsAt(bank, sel, s, linear);
+  const anySolo = TRACKS.some(tr => solo[tr.id]);
+  const stepDur = 60 / bpm / 4;
+  for (const tr of TRACKS) {
+    if (!hit[tr.id] || mute[tr.id] || (anySolo && !solo[tr.id])) continue;
+    let tt = t;
+    if ((feeling === 'flam' || feeling === 'slop') && (tr.id === 'KICK' || tr.id === 'SNARE')) tt += 0.012;
+    if (feeling === 'slop' && (tr.id === 'HIHAT1' || tr.id === 'HIHAT2')) tt += 0.018;
+    if (feeling === 'rolls' && tr.id === 'HIHAT2') {
+      for (let k = 0; k < 3; k++) VOICES.HIHAT2(tt + k * stepDur / 3, 0.12);
+      continue;
+    }
+    VOICES[tr.id](tt);
+  }
+}
+
+function tick() {
+  for (;;) {
+    const t = stepTime();
+    if (t > ctx.currentTime + LOOKAHEAD) break;
+    if (t >= ctx.currentTime - 0.02) { playStep(step, t); visQ.push({ step, t }); }
+    step = (step + 1) % 64;
+    if (step % 4 === 0) beatTime += 60 / bpm;
+  }
+}
+
+function start() {
+  initAudio();
+  step = 0;
+  beatTime = ctx.currentTime + 0.06;
+  visQ = [];
+  playing = true;
+  $('#btnPlay').classList.add('on');
+  $('#btnPlay').textContent = '■';
+  tick();
+  timer = setInterval(tick, 25);
+  requestAnimationFrame(drawPlayhead);
+}
+function stop() {
+  playing = false;
+  clearInterval(timer);
+  visQ = [];
+  setPlayhead(null);
+  $('#btnPlay').classList.remove('on');
+  $('#btnPlay').textContent = '▶';
+}
+function togglePlay() { playing ? stop() : start(); }
+
+let phCells = [];
+function setPlayhead(s) {
+  for (const c of phCells) c.classList.remove('ph');
+  phCells = [];
+  if (s === null) return;
+  for (const t of TRACKS) {
+    const c = els[t.id].cells[s % t.len];
+    c.classList.add('ph');
+    phCells.push(c);
+  }
+}
+function drawPlayhead() {
+  if (!playing) return;
+  const now = ctx.currentTime;
+  let cur = null;
+  while (visQ.length && visQ[0].t <= now) cur = visQ.shift();
+  if (cur) setPlayhead(cur.step);
+  requestAnimationFrame(drawPlayhead);
+}
+
+// ---------- UI ----------
+const els = {};
+
+function buildTracks() {
+  const main = $('#tracks');
+  for (const t of TRACKS) {
+    const card = document.createElement('section');
+    card.className = 'track';
+    card.style.setProperty('--c', t.color);
+    card.innerHTML = `
+      <div class="thead">
+        <button class="tname" title="Klik om het geluid te horen"><i class="led"></i>${t.name}</button>
+        <span class="plabel"></span>
+        <span class="spacer"></span>
+        <button class="ms" data-act="mute" aria-pressed="false" title="Mute">M</button>
+        <button class="ms" data-act="solo" aria-pressed="false" title="Solo">S</button>
+      </div>
+      <div class="strip"></div>
+      <div class="tools">
+        <button data-act="copy">Kopieer</button>
+        <button data-act="paste">Plak</button>
+        <button data-act="clear">Wis</button>
+        ${t.len === 64 ? '<button data-act="fill" title="Kopieer bar 1 naar bar 2–4">Bar 1 → 2–4</button>' : ''}
+      </div>
+      <div class="grid"></div>`;
+    const strip = card.querySelector('.strip');
+    const stripBtns = [];
+    for (let p = 0; p < NPTN; p++) {
+      const b = document.createElement('button');
+      b.textContent = p;
+      b.title = `PTN${p}`;
+      b.onclick = () => { sel[t.id] = p; renderTrack(t); renderAllStrip(); };
+      strip.appendChild(b);
+      stripBtns.push(b);
+    }
+    const grid = card.querySelector('.grid');
+    const cells = [];
+    for (let r = 0; r < t.len / 16; r++) {
+      const row = document.createElement('div'); row.className = 'row';
+      for (let g = 0; g < 4; g++) {
+        const grp = document.createElement('div'); grp.className = 'grp';
+        for (let k = 0; k < 4; k++) {
+          const i = r * 16 + g * 4 + k;
+          const c = document.createElement('button');
+          c.className = 'step';
+          c.dataset.t = t.id; c.dataset.i = i;
+          c.setAttribute('aria-label', `${t.name} step ${i + 1}`);
+          grp.appendChild(c); cells.push(c);
+        }
+        row.appendChild(grp);
+      }
+      grid.appendChild(row);
+    }
+    card.querySelector('.tname').onclick = () => audition(t.id);
+    card.querySelector('.thead').addEventListener('click', e => {
+      const b = e.target.closest('.ms'); if (!b) return;
+      const map = b.dataset.act === 'mute' ? mute : solo;
+      map[t.id] = !map[t.id];
+      b.setAttribute('aria-pressed', String(!!map[t.id]));
+      card.classList.toggle('muted', !!mute[t.id]);
+    });
+    card.querySelector('.tools').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (b) toolAction(t, b.dataset.act);
+    });
+    main.appendChild(card);
+    els[t.id] = { card, stripBtns, cells, label: card.querySelector('.plabel') };
+  }
+}
+
+function isFilled(arr) { return arr.some(v => v === 1); }
+
+function renderTrack(t) {
+  const e = els[t.id];
+  const p = sel[t.id];
+  const arr = bank[t.id][p];
+  e.label.textContent = `PTN${p}` + (t.len === 64 ? ' · 4 bars' : ' · 1 bar');
+  e.stripBtns.forEach((b, i) => {
+    b.classList.toggle('filled', isFilled(bank[t.id][i]));
+    b.classList.toggle('sel', i === p);
+  });
+  e.cells.forEach((c, i) => c.classList.toggle('on', arr[i] === 1));
+}
+function renderAllStrip() {
+  const btns = $('#allStrip').children;
+  for (let p = 0; p < NPTN; p++) {
+    btns[p].classList.toggle('sel', TRACKS.every(t => sel[t.id] === p));
+    btns[p].classList.toggle('filled', TRACKS.some(t => isFilled(bank[t.id][p])));
+  }
+}
+function renderAll() {
+  TRACKS.forEach(renderTrack);
+  renderAllStrip();
+}
+
+function buildAllStrip() {
+  const s = $('#allStrip');
+  for (let p = 0; p < NPTN; p++) {
+    const b = document.createElement('button');
+    b.textContent = p; b.title = `Alle tracks naar PTN${p}`;
+    b.onclick = () => { TRACKS.forEach(t => { sel[t.id] = p; }); renderAll(); };
+    s.appendChild(b);
+  }
+}
+
+function toolAction(t, act) {
+  const arr = bank[t.id][sel[t.id]];
+  if (act === 'copy') {
+    clip = { len: t.len, data: arr.slice(), from: `${t.name} PTN${sel[t.id]}` };
+    notice(`Gekopieerd: ${clip.from}`, 'ok');
+    return;
+  }
+  if (act === 'paste') {
+    if (!clip) { notice('Eerst een patroon kopiëren.'); return; }
+    pushUndo();
+    for (let i = 0; i < t.len; i++) arr[i] = clip.data[i % clip.len];
+  } else if (act === 'clear') {
+    pushUndo(); arr.fill(0);
+  } else if (act === 'fill') {
+    pushUndo();
+    for (let i = 16; i < 64; i++) arr[i] = arr[i % 16];
+  } else return;
+  renderTrack(t); renderAllStrip(); setDirty(true);
+}
+
+// step painting
+let paint = null;
+function setStep(id, i, v) {
+  const arr = bank[id][sel[id]];
+  if (arr[i] === v) return;
+  arr[i] = v;
+  els[id].cells[i].classList.toggle('on', v === 1);
+  setDirty(true);
+}
+$('#tracks').addEventListener('pointerdown', e => {
+  const c = e.target.closest('.step'); if (!c) return;
+  e.preventDefault();
+  const id = c.dataset.t, i = +c.dataset.i;
+  pushUndo();
+  paint = { id, v: bank[id][sel[id]][i] ? 0 : 1 };
+  setStep(id, i, paint.v);
+});
+document.addEventListener('pointermove', e => {
+  if (!paint) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const c = el && el.closest && el.closest('.step');
+  if (c && c.dataset.t === paint.id) setStep(paint.id, +c.dataset.i, paint.v);
+});
+function endPaint() {
+  if (!paint) return;
+  const t = TRACK_BY_ID[paint.id];
+  paint = null;
+  renderTrack(t); renderAllStrip();
+}
+document.addEventListener('pointerup', endPaint);
+document.addEventListener('pointercancel', endPaint);
+// toetsenbord (Enter/Spatie op een gefocuste step)
+$('#tracks').addEventListener('click', e => {
+  if (e.detail !== 0) return;
+  const c = e.target.closest('.step'); if (!c) return;
+  const id = c.dataset.t, i = +c.dataset.i;
+  pushUndo();
+  setStep(id, i, bank[id][sel[id]][i] ? 0 : 1);
+  renderTrack(TRACK_BY_ID[id]); renderAllStrip();
+});
+
+// transport controls
+function buildTransport() {
+  const sb = $('#shuffleBtns');
+  SHUFFLES.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.textContent = s.n; b.title = `Shuffle ${i + 1}: ${s.d}`;
+    b.style.setProperty('--c', 'var(--snare)');
+    b.onclick = () => { shuffle = i; renderTransport(); };
+    sb.appendChild(b);
+  });
+  const fb = $('#feelBtns');
+  FEELINGS.forEach(f => {
+    const b = document.createElement('button');
+    b.textContent = f.name; b.style.setProperty('--c', f.c);
+    b.onclick = () => { feeling = f.id; renderTransport(); };
+    fb.appendChild(b);
+  });
+}
+function renderTransport() {
+  [...$('#shuffleBtns').children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === shuffle)));
+  [...$('#feelBtns').children].forEach((b, i) => b.setAttribute('aria-pressed', String(FEELINGS[i].id === feeling)));
+  const sh = SHUFFLES[shuffle];
+  let html = '';
+  for (let h = 0; h < 2; h++) {
+    html += '<span class="half">';
+    for (let k = 0; k < sh.n; k++) html += `<i class="${sh.pos.includes(k) ? 'on' : ''}"></i>`;
+    html += '</span>';
+  }
+  $('#shuffleViz').innerHTML = html + `<span class="shdesc">${sh.d}</span>`;
+  $('#btnLinear').setAttribute('aria-pressed', String(linear));
+}
+function setBpm(v) {
+  v = Math.max(30, Math.min(300, Math.round(+v || 90)));
+  bpm = v;
+  $('#tempo').value = v; $('#tempoRange').value = v;
+}
+$('#tempo').addEventListener('change', e => setBpm(e.target.value));
+$('#tempoRange').addEventListener('input', e => setBpm(e.target.value));
+$('#tempoDown').onclick = () => setBpm(bpm - 1);
+$('#tempoUp').onclick = () => setBpm(bpm + 1);
+$('#btnPlay').onclick = togglePlay;
+$('#btnLinear').onclick = () => { linear = !linear; renderTransport(); };
+$('#vol').addEventListener('input', e => {
+  volume = +e.target.value;
+  if (master) master.gain.setTargetAtTime(volume, ctx.currentTime, 0.02);
+});
+
+// ---------- files ----------
+const PICKER_TYPES = [{ description: 'Stolperbeats pattern bank', accept: { 'text/plain': ['.txt'] } }];
+
+function updateFileInfo() {
+  $('#fileName').textContent = fileName;
+  const n = bankNumFromName(fileName);
+  if (n) $('#bankNum').value = n;
+}
+
+function loadText(text, name, handle) {
+  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return;
+  const res = parseBank(text);
+  if (res.found === 0) {
+    notice(`${name}: geen patronen gevonden. Is dit een PatternBank-bestand?`, 'warn');
+    return;
+  }
+  bank = res.bank; eol = res.eol; fileName = name; fileHandle = handle || null;
+  TRACKS.forEach(t => { sel[t.id] = 0; });
+  undoStack = [];
+  setDirty(false);
+  updateFileInfo();
+  renderAll();
+  const lines = [`Geopend: ${name} (${res.found} van ${TRACKS.length * NPTN} patronen).`];
+  if (res.missing) lines.push(`${res.missing} patronen ontbraken en zijn leeg gezet.`);
+  if (res.unknown.length) lines.push(`${res.unknown.length} regel(s) niet herkend (regel ${res.unknown.slice(0, 5).join(', ')}${res.unknown.length > 5 ? ', …' : ''}). Die worden niet opgeslagen.`);
+  lines.push(...res.warnings.slice(0, 5));
+  if (res.warnings.length > 5) lines.push(`… en ${res.warnings.length - 5} waarschuwingen meer.`);
+  notice(lines.join('\n'), (res.missing || res.unknown.length || res.warnings.length) ? 'warn' : 'ok');
+}
+
+async function openFile() {
+  if (window.showOpenFilePicker) {
+    try {
+      const [h] = await window.showOpenFilePicker({ types: PICKER_TYPES });
+      const f = await h.getFile();
+      loadText(await f.text(), f.name, h);
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+  $('#fileInput').click();
+}
+$('#fileInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  loadText(await f.text(), f.name, null);
+  e.target.value = '';
+});
+
+function download() {
+  const blob = new Blob([serializeBank(bank, eol)], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  setDirty(false);
+  notice(`Gedownload als ${fileName}. Kopieer het naar de root van de SD-kaart.`, 'ok');
+}
+
+async function save() {
+  if (window.showSaveFilePicker) {
+    try {
+      let h = fileHandle;
+      if (!h || h.name !== fileName) h = await window.showSaveFilePicker({ suggestedName: fileName, types: PICKER_TYPES });
+      const w = await h.createWritable();
+      await w.write(serializeBank(bank, eol));
+      await w.close();
+      fileHandle = h; fileName = h.name;
+      updateFileInfo(); setDirty(false);
+      notice(`Opgeslagen: ${h.name}`, 'ok');
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      notice(`Direct opslaan lukte niet (${e.message}). Bestand wordt gedownload.`, 'warn');
+    }
+  }
+  download();
+}
+
+function newBank() {
+  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return;
+  bank = emptyBank(); eol = '\n'; fileHandle = null;
+  fileName = nameFromBankNum(+$('#bankNum').value || 5);
+  TRACKS.forEach(t => { sel[t.id] = 0; });
+  undoStack = [];
+  setDirty(false); updateFileInfo(); renderAll();
+}
+
+$('#btnOpen').onclick = openFile;
+$('#btnSave').onclick = save;
+$('#btnDownload').onclick = download;
+$('#btnNew').onclick = newBank;
+$('#btnUndo').onclick = undo;
+$('#bankNum').addEventListener('change', e => {
+  const n = Math.max(1, Math.min(64, Math.round(+e.target.value || 5)));
+  e.target.value = n;
+  fileName = nameFromBankNum(n);
+  $('#fileName').textContent = fileName;
+  setDirty(true);
+});
+
+// drag & drop
+let dragDepth = 0;
+document.addEventListener('dragenter', e => { if (e.dataTransfer.types.includes('Files')) { dragDepth++; document.body.classList.add('dragging'); } });
+document.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', async e => {
+  e.preventDefault();
+  dragDepth = 0; document.body.classList.remove('dragging');
+  const item = e.dataTransfer.items && e.dataTransfer.items[0];
+  let handle = null;
+  if (item && item.getAsFileSystemHandle) {
+    try { const h = await item.getAsFileSystemHandle(); if (h && h.kind === 'file') handle = h; } catch (_) {}
+  }
+  const f = handle ? await handle.getFile() : e.dataTransfer.files[0];
+  if (f) loadText(await f.text(), f.name, handle);
+});
+
+// keyboard
+document.addEventListener('keydown', e => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); save(); return; }
+  if (mod && e.key.toLowerCase() === 'z') {
+    if (e.target.matches('input')) return;
+    e.preventDefault(); undo(); return;
+  }
+  if (e.code === 'Space' && !e.target.matches('input, textarea')) {
+    e.preventDefault();
+    if (e.target.blur) e.target.blur();
+    togglePlay();
+  }
+});
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// init
+buildTransport();
+buildAllStrip();
+buildTracks();
+renderTransport();
+renderAll();
+updateFileInfo();
+</script>
+</body>
+</html>
