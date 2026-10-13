@@ -107,6 +107,47 @@ h1 span{color:var(--muted);font-weight:400}
   .grid{grid-column:2;grid-row:1 / span 3;align-self:center}
 }
 
+/* SD-kaart */
+.sd{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.sd summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.sd summary .lbl{display:inline;margin:0}
+.sd summary .lbl::before{content:"▸ ";color:var(--muted)}
+.sd[open] summary .lbl::before{content:"▾ "}
+.sd h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:400;margin:14px 0 6px}
+.sdbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:10px}
+.sdbar .spacer{flex:1}
+.muted{color:var(--muted)}
+.banks{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
+@media (max-width:700px){ .banks{grid-template-columns:repeat(8,1fr)} }
+.bk{display:flex;flex-direction:column;gap:2px}
+.bk button{padding:0;border-radius:4px;background:var(--bg)}
+.bk-open{height:28px;font-size:12px;color:var(--muted);border-style:dashed}
+.bk.file .bk-open{color:var(--text);background:#262626;border-style:solid;font-weight:700}
+.bk.factory .bk-open{text-decoration:underline;text-underline-offset:3px}
+.bk.cur .bk-open{border-color:var(--hh2);box-shadow:inset 0 0 0 1px var(--hh2)}
+.bk.issue .bk-open{color:var(--warn)}
+.bk-act{height:16px;display:flex;align-items:center;justify-content:center}
+.bk-act::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--off)}
+.bk-act[aria-pressed="true"]::before{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.bk-act.changed{border-color:var(--warn)}
+.bk-act:disabled{cursor:default;opacity:.4}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin:0 3px 0 0}
+.remarks{margin:8px 0 0;padding-left:18px;color:var(--warn);font-size:13px}
+.remarks:empty{display:none}
+.sdtable{width:100%;border-collapse:collapse;font-size:13px}
+.sdtable td{border-top:1px solid var(--line);padding:4px 8px 4px 0;vertical-align:top}
+.sdtable td.v{font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.sdtable td.n{white-space:nowrap;color:var(--muted);text-align:right}
+.sdtable button{padding:1px 8px;font-size:12px}
+@media (max-width:520px){
+  #sdFiles tr{display:grid;grid-template-columns:1fr auto auto;align-items:center;border-top:1px solid var(--line)}
+  #sdFiles td{border:none}
+  #sdFiles td.v{grid-column:1 / -1;padding-bottom:0}
+  #sdFiles td.d{display:none}
+}
+.sdview{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin:8px 0 0;max-height:360px;overflow:auto;font-size:12px;white-space:pre}
+
 footer{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
 footer p{margin:0 0 6px}
 kbd{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
@@ -119,12 +160,14 @@ body.dragging .drop{display:flex}
   <header class="top">
     <h1>Stolperbeats <span>bank editor</span></h1>
     <div class="file">
+      <button id="btnCard" class="primary" title="Map van de SD-kaart openen">SD-kaart</button>
       <button id="btnOpen" class="primary">Openen</button>
       <button id="btnSave" class="primary" title="Ctrl/Cmd+S">Opslaan</button>
       <button id="btnDownload">Downloaden</button>
       <button id="btnNew">Nieuw</button>
       <button id="btnUndo" title="Ctrl/Cmd+Z">Ongedaan</button>
       <input type="file" id="fileInput" accept=".txt,text/plain" hidden>
+      <input type="file" id="dirInput" webkitdirectory hidden>
     </div>
     <div class="fileinfo">
       <label>Bank op module <input id="bankNum" type="number" min="1" max="64" value="5"></label>
@@ -134,6 +177,34 @@ body.dragging .drop{display:flex}
   </header>
 
   <div id="notice" class="notice" hidden><span id="noticeText"></span><button id="noticeClose" aria-label="Sluiten">×</button></div>
+
+  <details id="sd" class="sd" hidden open>
+    <summary><span class="lbl">SD-kaart</span><span id="sdSummary"></span></summary>
+    <div class="sdbar">
+      <button id="sdRescan">Opnieuw scannen</button>
+      <button id="sdBackup">Back-up (ZIP)</button>
+      <span id="sdStatus" class="muted"></span>
+      <span class="spacer"></span>
+      <button id="sdClose">Kaart sluiten</button>
+    </div>
+    <ul id="sdRemarks" class="remarks"></ul>
+
+    <h2>Banken</h2>
+    <div class="banks" id="sdBanks"></div>
+    <div class="legend">Vet = bestand aanwezig, gestippeld = geen bestand, onderstreept = fabrieksbank, <i></i>= aan in PATTERNBANK_ACTIVE (klik om te wisselen). Klik op een nummer om de bank te openen.</div>
+    <div class="sdbar">
+      <button id="sdCfgSave" class="primary" disabled>MachineConfig.txt opslaan</button>
+      <button id="sdCfgReset" disabled>Wijzigingen terugdraaien</button>
+      <span id="sdCfgInfo" class="muted"></span>
+    </div>
+
+    <h2>MachineConfig.txt</h2>
+    <table class="sdtable" id="sdConfig"></table>
+
+    <h2>Overige bestanden</h2>
+    <table class="sdtable" id="sdFiles"></table>
+    <pre class="sdview" id="sdView" hidden></pre>
+  </details>
 
   <section class="transport">
     <div class="playwrap"><span class="lbl">&nbsp;</span><button id="btnPlay" class="play" aria-label="Start/stop">▶</button></div>
@@ -171,6 +242,7 @@ body.dragging .drop{display:flex}
   <footer>
     <p><b>Preview.</b> Steps vallen op de posities uit de shuffle-weergave in de handleiding, per tel van 4 steps. Dat is een benadering. Timing (Trip/Shake/Push/Clave) zit niet in de preview. Feeling is een benadering: Flam en Slop vertragen kick en snare (Slop ook de hihats), Rolls vervangt Hihat 2 door een burst. Linear volgt de handleiding.</p>
     <p><b>Op de module.</b> PatternBank004.txt is bank 5. Zet de bank aan in MachineConfig.txt (PATTERNBANK_ACTIVE) of via Bank Edit. Verwissel de SD-kaart alleen met de module uit.</p>
+    <p><b>SD-kaart.</b> Kies de root van de kaart. Direct schrijven werkt in Chrome en Edge op desktop; vóór de eerste schrijfactie downloadt de editor een ZIP-back-up van de hele kaart. Andere browsers lezen alleen en slaan op via downloads. Je kunt de map ook op de pagina slepen.</p>
     <p><b>Sneltoetsen.</b> <kbd>Spatie</kbd> start/stop · <kbd>Ctrl/Cmd+S</kbd> opslaan · <kbd>Ctrl/Cmd+Z</kbd> ongedaan · klik op een tracknaam om het geluid te horen · sleep over steps om meerdere te zetten · sleep een bestand op de pagina om het te openen.</p>
   </footer>
 </div>
@@ -259,6 +331,113 @@ function hitsAt(bank, sel, s, linear) {
   }
   return hit;
 }
+
+// ---------- SD-kaart ----------
+const NBANKS = 64;
+
+// Wat is dit bestand? Banken en MachineConfig alleen op de root, exact zoals de module ze noemt.
+function classifyPath(path) {
+  const parts = path.split('/');
+  const name = parts[parts.length - 1];
+  if (name.startsWith('._')) return { kind: 'appledouble' };
+  if (parts.length > 1) return { kind: 'other' };
+  const m = /^PatternBank(\d{3})\.txt$/i.exec(name);
+  if (m) return +m[1] < NBANKS ? { kind: 'bank', num: +m[1] + 1 } : { kind: 'other', note: 'buiten bereik (max 063)' };
+  if (/^MachineConfig\.txt$/i.test(name)) return { kind: 'config' };
+  return { kind: 'other' };
+}
+
+const ACTIVE_RE = /^(\s*PATTERNBANK_ACTIVE\s*:\s*)([01,\s]*?)(\s*;?\s*)$/i;
+
+// MachineConfig.txt: 'SLEUTEL: waarde;' per regel. Alleen PATTERNBANK_ACTIVE wordt geïnterpreteerd.
+function parseConfig(text) {
+  const entries = [];
+  const other = [];
+  let active = null;
+  const warnings = [];
+  text.replace(/^﻿/, '').split(/\r?\n/).forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line) return;
+    const m = /^([A-Za-z0-9_]+)\s*:\s*(.*?)\s*;?$/.exec(line);
+    if (!m) { other.push(i + 1); return; }
+    entries.push({ key: m[1].toUpperCase(), value: m[2], line: i + 1 });
+    if (m[1].toUpperCase() === 'PATTERNBANK_ACTIVE') {
+      const bits = m[2].replace(/[\s,]/g, '');
+      if (!/^[01]*$/.test(bits)) { warnings.push(`Regel ${i + 1}: PATTERNBANK_ACTIVE bevat ongeldige tekens.`); return; }
+      if (bits.length !== NBANKS) warnings.push(`Regel ${i + 1}: PATTERNBANK_ACTIVE heeft ${bits.length} bits, verwacht ${NBANKS}.`);
+      active = new Uint8Array(NBANKS);
+      for (let b = 0; b < NBANKS; b++) active[b] = bits[b] === '1' ? 1 : 0;
+    }
+  });
+  return { entries, other, active, warnings };
+}
+
+function formatActive(active) {
+  const groups = [];
+  for (let k = 0; k < NBANKS; k += 16) groups.push(Array.from(active.slice(k, k + 16)).join(''));
+  return groups.join(', ');
+}
+
+// Vervangt alleen de bits van PATTERNBANK_ACTIVE. De rest van het bestand blijft byte voor byte gelijk.
+function setActiveInConfig(text, active) {
+  const parts = text.split(/(\r?\n)/);
+  let done = false;
+  for (let i = 0; i < parts.length && !done; i += 2) {
+    const m = ACTIVE_RE.exec(parts[i]);
+    if (m) { parts[i] = m[1] + formatActive(active) + m[3]; done = true; }
+  }
+  if (!done) throw new Error('PATTERNBANK_ACTIVE niet gevonden.');
+  return parts.join('');
+}
+
+// ZIP zonder compressie (methode 0), genoeg voor een back-up van een paar kB tot MB.
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(b) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < b.length; i++) c = CRC_TABLE[(c ^ b[i]) & 255] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(files) {
+  const enc = new TextEncoder();
+  const out = [], central = [];
+  let off = 0;
+  for (const f of files) {
+    const name = enc.encode(f.path);
+    const crc = crc32(f.data);
+    const d = new Date(f.mtime || Date.now());
+    const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const date = (Math.max(0, d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, f.data.length, true); lh.setUint32(22, f.data.length, true); lh.setUint16(26, name.length, true);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(12, time, true); ch.setUint16(14, date, true); ch.setUint32(16, crc, true);
+    ch.setUint32(20, f.data.length, true); ch.setUint32(24, f.data.length, true); ch.setUint16(28, name.length, true);
+    ch.setUint32(42, off, true);
+    out.push(new Uint8Array(lh.buffer), name, f.data);
+    central.push(new Uint8Array(ch.buffer), name);
+    off += 30 + name.length + f.data.length;
+  }
+  const cdSize = central.reduce((s, c) => s + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, off, true);
+  const all = [...out, ...central, new Uint8Array(end.buffer)];
+  const res = new Uint8Array(all.reduce((s, c) => s + c.length, 0));
+  let p = 0;
+  for (const c of all) { res.set(c, p); p += c.length; }
+  return res;
+}
 // @core-end
 
 const FEELINGS = [
@@ -280,6 +459,8 @@ const sel = Object.fromEntries(TRACKS.map(t => [t.id, 0]));
 const mute = {}, solo = {};
 let shuffle = 0, feeling = 'tight', linear = false, bpm = 90, volume = 0.8;
 let clip = null;
+let card = null;       // gescande SD-kaartmap
+let fileOnCard = null; // naam op de kaart van het geopende bestand
 let undoStack = [];
 
 function setDirty(v) {
@@ -711,13 +892,13 @@ function updateFileInfo() {
 }
 
 function loadText(text, name, handle) {
-  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return;
+  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return false;
   const res = parseBank(text);
   if (res.found === 0) {
     notice(`${name}: geen patronen gevonden. Is dit een PatternBank-bestand?`, 'warn');
-    return;
+    return false;
   }
-  bank = res.bank; eol = res.eol; fileName = name; fileHandle = handle || null;
+  bank = res.bank; eol = res.eol; fileName = name; fileHandle = handle || null; fileOnCard = null;
   TRACKS.forEach(t => { sel[t.id] = 0; });
   undoStack = [];
   setDirty(false);
@@ -729,6 +910,7 @@ function loadText(text, name, handle) {
   lines.push(...res.warnings.slice(0, 5));
   if (res.warnings.length > 5) lines.push(`… en ${res.warnings.length - 5} waarschuwingen meer.`);
   notice(lines.join('\n'), (res.missing || res.unknown.length || res.warnings.length) ? 'warn' : 'ok');
+  return true;
 }
 
 async function openFile() {
@@ -750,18 +932,38 @@ $('#fileInput').addEventListener('change', async e => {
   e.target.value = '';
 });
 
-function download() {
-  const blob = new Blob([serializeBank(bank, eol)], { type: 'text/plain' });
+function downloadBlob(blob, name) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = fileName;
+  a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+function download() {
+  downloadBlob(new Blob([serializeBank(bank, eol)], { type: 'text/plain' }), fileName);
   setDirty(false);
   notice(`Gedownload als ${fileName}. Kopieer het naar de root van de SD-kaart.`, 'ok');
 }
 
 async function save() {
+  if (card && card.dir && classifyPath(fileName).kind === 'bank') {
+    try {
+      const onCard = findOnCard(fileName);
+      if (onCard && !sameName(fileOnCard, fileName) && !confirm(`${onCard.path} staat al op de kaart. Overschrijven?`)) return;
+      const h = await writeToCard(fileName, serializeBank(bank, eol));
+      fileHandle = h; fileName = h.name; fileOnCard = h.name;
+      updateFileInfo(); setDirty(false);
+      await scanCard(card.dir);
+      const n = bankNumFromName(fileName);
+      const off = card.active && !card.active[n - 1];
+      notice(`Opgeslagen op de kaart: ${fileName}.` +
+        (off ? `\nBank ${n} staat uit in PATTERNBANK_ACTIVE. Zet hem aan bij de SD-kaart en sla MachineConfig.txt op.` : ''), off ? 'warn' : 'ok');
+    } catch (e) {
+      if (e.name !== 'AbortError') notice(`Schrijven naar de kaart lukte niet (${e.message}).`, 'warn');
+    }
+    return;
+  }
   if (window.showSaveFilePicker) {
     try {
       let h = fileHandle;
@@ -781,19 +983,21 @@ async function save() {
   download();
 }
 
-function newBank() {
-  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return;
-  bank = emptyBank(); eol = '\n'; fileHandle = null;
-  fileName = nameFromBankNum(+$('#bankNum').value || 5);
+function newBank(n) {
+  if (dirty && !confirm('Niet-opgeslagen wijzigingen gaan verloren. Doorgaan?')) return false;
+  bank = emptyBank(); eol = '\n'; fileHandle = null; fileOnCard = null;
+  fileName = nameFromBankNum(n || +$('#bankNum').value || 5);
   TRACKS.forEach(t => { sel[t.id] = 0; });
   undoStack = [];
   setDirty(false); updateFileInfo(); renderAll();
+  if (card) renderCard();
+  return true;
 }
 
 $('#btnOpen').onclick = openFile;
 $('#btnSave').onclick = save;
 $('#btnDownload').onclick = download;
-$('#btnNew').onclick = newBank;
+$('#btnNew').onclick = () => newBank();
 $('#btnUndo').onclick = undo;
 $('#bankNum').addEventListener('change', e => {
   const n = Math.max(1, Math.min(64, Math.round(+e.target.value || 5)));
@@ -801,6 +1005,337 @@ $('#bankNum').addEventListener('change', e => {
   fileName = nameFromBankNum(n);
   $('#fileName').textContent = fileName;
   setDirty(true);
+  if (card) renderCard();
+});
+
+// ---------- SD-kaart ----------
+const SKIP_DIRS = /^(System Volume Information|\.Spotlight-V100|\.Trashes|\.fseventsd|\.TemporaryItems)$/i;
+const MAX_FILES = 2000;
+const NFACTORY = 4;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtSize = n => n < 1024 ? `${n} B` : `${(n / 1024).toFixed(n < 10240 ? 1 : 0)} kB`;
+const fmtDate = ms => ms ? new Date(ms).toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' }) : '';
+const sameName = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
+const findOnCard = name => card && card.entries.find(e => !e.dir && sameName(e.path, name));
+
+// Alle bestanden onder een map. Systeemmappen worden genoemd maar niet doorzocht.
+async function walkDir(dir) {
+  const entries = [], errors = [];
+  async function walk(d, prefix, depth) {
+    try {
+      for await (const [name, h] of d.entries()) {
+        if (entries.length >= MAX_FILES) return;
+        const path = prefix + name;
+        if (h.kind === 'directory') {
+          if (SKIP_DIRS.test(name) || depth >= 4) entries.push({ path: path + '/', dir: true });
+          else await walk(h, path + '/', depth + 1);
+          continue;
+        }
+        try {
+          const f = await h.getFile();
+          entries.push({ path, size: f.size, mtime: f.lastModified, handle: h, read: () => h.getFile() });
+        } catch (e) { errors.push(`${path}: ${e.message}`); }
+      }
+    } catch (e) { errors.push(`${prefix || 'root'}: ${e.message}`); }
+  }
+  await walk(dir, '', 0);
+  if (entries.length >= MAX_FILES) errors.push(`Meer dan ${MAX_FILES} bestanden. Scan gestopt; is dit wel de SD-kaart?`);
+  return { entries, errors };
+}
+
+// Terugval zonder File System Access API: <input webkitdirectory>, alleen lezen.
+function entriesFromFiles(files) {
+  const entries = [];
+  for (const f of files) {
+    const parts = (f.webkitRelativePath || f.name).split('/');
+    const path = parts.length > 1 ? parts.slice(1).join('/') : f.name;
+    if (path.split('/').some(p => SKIP_DIRS.test(p))) continue;
+    entries.push({ path, size: f.size, mtime: f.lastModified, handle: null, read: async () => f });
+  }
+  return entries;
+}
+
+async function setCard(name, dir, entries, errors) {
+  const prev = card;
+  const banks = Array(NBANKS).fill(null);
+  const others = [];
+  let config = null;
+  for (const e of entries.sort((a, b) => a.path.localeCompare(b.path))) {
+    if (e.dir) { others.push({ e, type: 'map, niet doorzocht' }); continue; }
+    const c = classifyPath(e.path);
+    try {
+      if (c.kind === 'bank') {
+        const r = parseBank(await (await e.read()).text());
+        let filled = 0;
+        for (let p = 0; p < NPTN; p++) if (TRACKS.some(t => isFilled(r.bank[t.id][p]))) filled++;
+        const issues = [];
+        if (!r.found) issues.push('geen patronen herkend');
+        else if (r.missing) issues.push(`${r.missing} patronen ontbreken`);
+        if (r.unknown.length) issues.push(`${r.unknown.length} onbekende regels`);
+        if (r.warnings.length) issues.push(`${r.warnings.length} waarschuwingen`);
+        banks[c.num - 1] = { e, filled, issues };
+        continue;
+      }
+      if (c.kind === 'config') {
+        const text = await (await e.read()).text();
+        config = { e, text, parsed: parseConfig(text) };
+        others.push({ e, type: 'instellingen' });
+        continue;
+      }
+    } catch (err) { errors.push(`${e.path}: ${err.message}`); }
+    others.push({ e, type: c.kind === 'appledouble' ? 'macOS-metadata' : 'onbekend' + (c.note ? `, ${c.note}` : '') });
+  }
+  let keepBackup = false;
+  if (prev && prev.dir && dir) { try { keepBackup = await prev.dir.isSameEntry(dir); } catch (_) {} }
+  const active = config && config.parsed.active ? config.parsed.active.slice() : null;
+  // Niet-opgeslagen aan/uit-wijzigingen overleven een herscan van dezelfde kaart.
+  if (keepBackup && active && activeDirty()) active.set(prev.active);
+  if (prev && prev.dir !== dir && fileOnCard) { fileOnCard = null; fileHandle = null; }
+  card = { name, dir, entries, errors, banks, others, config, active, backupAt: keepBackup ? prev.backupAt : null };
+  $('#sd').hidden = false;
+  $('#sd').open = true;
+  $('#btnSave').textContent = dir ? 'Opslaan op kaart' : 'Opslaan';
+  $('#sdView').hidden = true;
+  renderCard();
+}
+
+async function scanCard(dir) {
+  const { entries, errors } = await walkDir(dir);
+  await setCard(dir.name, dir, entries, errors);
+}
+
+async function openCard() {
+  if (activeDirty() && !confirm('Niet-opgeslagen wijzigingen in MachineConfig.txt gaan verloren. Doorgaan?')) return;
+  if (window.showDirectoryPicker) {
+    try {
+      await scanCard(await window.showDirectoryPicker({ id: 'stolperbeats-sd', mode: 'readwrite' }));
+    } catch (e) {
+      if (e.name !== 'AbortError') notice(`Map openen lukte niet (${e.message}).`, 'warn');
+    }
+    return;
+  }
+  $('#dirInput').click();
+}
+$('#dirInput').addEventListener('change', async e => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (!files.length) return;
+  const name = (files[0].webkitRelativePath || '').split('/')[0] || 'map';
+  await setCard(name, null, entriesFromFiles(files), []);
+});
+
+function closeCard() {
+  if (activeDirty() && !confirm('Niet-opgeslagen wijzigingen in MachineConfig.txt gaan verloren. Doorgaan?')) return;
+  if (fileOnCard) { fileOnCard = null; fileHandle = null; }
+  card = null;
+  $('#sd').hidden = true;
+  $('#btnSave').textContent = 'Opslaan';
+}
+
+function activeDirty() {
+  if (!card || !card.active) return false;
+  const orig = card.config.parsed.active;
+  return card.active.some((v, i) => v !== orig[i]);
+}
+
+function renderCard() {
+  const nb = card.banks.filter(Boolean).length;
+  const na = card.active ? card.active.reduce((s, v) => s + v, 0) : null;
+  $('#sdSummary').textContent = ` ${card.name} · ${nb} banken` + (na === null ? '' : `, ${na} aan`) +
+    ` · ${card.others.length} overige bestanden` + (card.dir ? '' : ' · alleen lezen');
+  renderCardStatus();
+
+  // opmerkingen
+  const rem = [...card.errors];
+  if (!card.config) rem.push('Geen MachineConfig.txt op de root gevonden. Is dit de root van de SD-kaart?');
+  else {
+    if (!card.active) rem.push('MachineConfig.txt heeft geen bruikbare PATTERNBANK_ACTIVE-regel. Banken aan- en uitzetten kan niet.');
+    rem.push(...card.config.parsed.warnings);
+  }
+  if (card.active) {
+    const lost = [];
+    card.active.forEach((v, i) => { if (v && !card.banks[i]) lost.push(i + 1); });
+    if (lost.length) rem.push(`Aan, maar zonder bestand: bank ${lost.join(', ')}.`);
+  }
+  for (const b of card.banks) if (b && b.issues.length) rem.push(`${b.e.path}: ${b.issues.join(', ')}.`);
+  const ad = card.others.filter(o => o.type === 'macOS-metadata').length;
+  if (ad) rem.push(`${ad} macOS-metadatabestand(en) (._*). De editor negeert ze.`);
+  $('#sdRemarks').innerHTML = rem.map(r => `<li>${esc(r)}</li>`).join('');
+
+  // banken
+  const cur = bankNumFromName(fileName);
+  const orig = card.active && card.config.parsed.active;
+  let html = '';
+  for (let i = 0; i < NBANKS; i++) {
+    const b = card.banks[i], n = i + 1;
+    const cls = ['bk', b && 'file', i < NFACTORY && 'factory', n === cur && 'cur', b && b.issues.length && 'issue'].filter(Boolean).join(' ');
+    const title = `Bank ${n} · ${b ? b.e.path : nameFromBankNum(n)}` +
+      (b ? ` · ${b.filled} van ${NPTN} patronen gevuld` : ' · geen bestand, klik voor een lege bank') +
+      (i < NFACTORY ? ' · fabrieksbank' : '') + (b && b.issues.length ? ` · ${b.issues.join(', ')}` : '');
+    const on = card.active ? card.active[i] === 1 : false;
+    html += `<div class="${cls}"><button class="bk-open" data-n="${n}" title="${esc(title)}">${n}</button>` +
+      `<button class="bk-act${orig && orig[i] !== card.active[i] ? ' changed' : ''}" data-n="${n}" aria-pressed="${on}"` +
+      ` aria-label="Bank ${n} aan in PATTERNBANK_ACTIVE"${card.active ? '' : ' disabled'}></button></div>`;
+  }
+  $('#sdBanks').innerHTML = html;
+
+  const dirtyCfg = activeDirty();
+  const nChanged = dirtyCfg ? card.active.reduce((s, v, i) => s + (v !== orig[i]), 0) : 0;
+  $('#sdCfgSave').disabled = !dirtyCfg;
+  $('#sdCfgReset').disabled = !dirtyCfg;
+  $('#sdCfgSave').textContent = card.dir ? 'MachineConfig.txt opslaan' : 'MachineConfig.txt downloaden';
+  $('#sdCfgInfo').textContent = dirtyCfg ? `${nChanged} bank(en) gewijzigd, nog niet opgeslagen.` : '';
+
+  // MachineConfig
+  if (!card.config) $('#sdConfig').innerHTML = '<tr><td class="muted">Niet gevonden.</td></tr>';
+  else {
+    const p = card.config.parsed;
+    $('#sdConfig').innerHTML = p.entries.map(en => `<tr><td>${esc(en.key)}</td><td class="v">${
+      en.key === 'PATTERNBANK_ACTIVE' && card.active ? esc(formatActive(card.active)) : esc(en.value)}</td></tr>`).join('') +
+      (p.other.length ? `<tr><td class="muted" colspan="2">${p.other.length} regel(s) in een ander formaat (regel ${p.other.slice(0, 8).join(', ')}${p.other.length > 8 ? ', …' : ''}). Bekijk het bestand hieronder.</td></tr>` : '') +
+      (!p.entries.length && !p.other.length ? '<tr><td class="muted">Leeg bestand.</td></tr>' : '');
+  }
+
+  // overige bestanden
+  $('#sdFiles').innerHTML = card.others.length ? card.others.map((o, i) => `<tr><td class="v">${esc(o.e.path)}</td>` +
+    `<td class="muted">${esc(o.type)}</td><td class="n">${o.e.dir ? '' : fmtSize(o.e.size)}</td>` +
+    `<td class="n d">${fmtDate(o.e.mtime)}</td><td class="n">${o.e.dir ? '' : `<button data-i="${i}">Bekijk</button>`}</td></tr>`).join('')
+    : '<tr><td class="muted">Geen.</td></tr>';
+}
+
+function renderCardStatus() {
+  $('#sdStatus').textContent = !card.dir
+    ? 'Alleen lezen: deze browser kan niet direct naar de kaart schrijven. Opslaan gaat via downloads.'
+    : card.backupAt
+      ? `Back-up gemaakt om ${card.backupAt.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}.`
+      : 'Nog geen back-up. Die wordt automatisch gedownload vóór de eerste schrijfactie.';
+}
+
+// ZIP van alle gescande bestanden, paden relatief aan de root van de kaart.
+async function downloadBackup() {
+  const files = [];
+  for (const e of card.entries) {
+    if (e.dir) continue;
+    const f = await e.read();
+    files.push({ path: e.path, data: new Uint8Array(await f.arrayBuffer()), mtime: f.lastModified });
+  }
+  const d = new Date();
+  const p2 = v => String(v).padStart(2, '0');
+  const name = `stolperbeats-sd-backup-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.zip`;
+  downloadBlob(new Blob([makeZip(files)], { type: 'application/zip' }), name);
+  card.backupAt = d;
+  renderCardStatus();
+  return name;
+}
+
+async function ensureWritable(h) {
+  const o = { mode: 'readwrite' };
+  if ((await h.queryPermission(o)) === 'granted') return;
+  if ((await h.requestPermission(o)) !== 'granted') throw new Error('geen schrijftoegang tot de map');
+}
+
+// Elke schrijfactie naar de kaart gaat hierlangs: eerst toestemming, dan (eenmalig) de back-up.
+async function writeToCard(name, text) {
+  await ensureWritable(card.dir);
+  if (!card.backupAt) {
+    const zip = await downloadBackup();
+    notice(`Back-up gedownload: ${zip}`, 'ok');
+  }
+  const existing = findOnCard(name);
+  const h = await card.dir.getFileHandle(existing ? existing.path : name, { create: true });
+  const w = await h.createWritable();
+  await w.write(text);
+  await w.close();
+  return h;
+}
+
+async function openCardBank(n) {
+  const b = card.banks[n - 1];
+  if (!b) {
+    if (newBank(n)) notice(`Nieuwe lege bank ${n}. ${card.dir ? 'Opslaan schrijft' : 'Downloaden geeft'} ${fileName}.`, 'ok');
+    return;
+  }
+  const f = await b.e.read();
+  if (loadText(await f.text(), b.e.path, b.e.handle)) {
+    fileOnCard = b.e.path;
+    renderCard();
+  }
+}
+
+async function saveConfig() {
+  const text = setActiveInConfig(card.config.text, card.active);
+  const name = card.config.e.path;
+  if (!card.dir) {
+    downloadBlob(new Blob([text], { type: 'text/plain' }), name);
+    card.config.text = text;
+    card.config.parsed = parseConfig(text);
+    renderCard();
+    notice(`Gedownload als ${name}. Kopieer het naar de root van de SD-kaart.`, 'ok');
+    return;
+  }
+  try {
+    await writeToCard(name, text);
+    card.config.text = text;
+    card.config.parsed = parseConfig(text);
+    await scanCard(card.dir);
+    notice(`${name} opgeslagen op de kaart.`, 'ok');
+  } catch (e) {
+    if (e.name !== 'AbortError') notice(`Schrijven naar de kaart lukte niet (${e.message}).`, 'warn');
+  }
+}
+
+function looksLikeText(b) {
+  let bad = 0;
+  const n = Math.min(b.length, 4096);
+  for (let i = 0; i < n; i++) {
+    const c = b[i];
+    if (c === 0) return false;
+    if (c < 9 || (c > 13 && c < 32) || c === 127) bad++;
+  }
+  return bad <= n * 0.02;
+}
+function hexDump(b, max = 4096) {
+  const lines = [];
+  for (let o = 0; o < Math.min(b.length, max); o += 16) {
+    const row = b.subarray(o, o + 16);
+    const hex = Array.from(row, v => v.toString(16).padStart(2, '0')).join(' ');
+    const asc = Array.from(row, v => v >= 32 && v < 127 ? String.fromCharCode(v) : '.').join('');
+    lines.push(`${o.toString(16).padStart(6, '0')}  ${hex.padEnd(47)}  ${asc}`);
+  }
+  if (b.length > max) lines.push(`… ${b.length - max} bytes meer`);
+  return lines.join('\n');
+}
+async function viewEntry(e) {
+  const v = $('#sdView');
+  if (!v.hidden && v.dataset.path === e.path) { v.hidden = true; return; }
+  const b = new Uint8Array(await (await e.read()).arrayBuffer());
+  const text = looksLikeText(b);
+  v.textContent = `${e.path} · ${fmtSize(b.length)} · ${text ? 'tekst' : 'binair, hex'}\n\n` +
+    (text ? new TextDecoder().decode(b.subarray(0, 200000)) : hexDump(b));
+  v.dataset.path = e.path;
+  v.hidden = false;
+}
+
+$('#btnCard').onclick = openCard;
+$('#sdRescan').onclick = () => card.dir ? scanCard(card.dir) : $('#dirInput').click();
+$('#sdBackup').onclick = async () => {
+  try { notice(`Back-up gedownload: ${await downloadBackup()}`, 'ok'); }
+  catch (e) { notice(`Back-up maken lukte niet (${e.message}).`, 'warn'); }
+};
+$('#sdClose').onclick = closeCard;
+$('#sdCfgSave').onclick = saveConfig;
+$('#sdCfgReset').onclick = () => { card.active = card.config.parsed.active.slice(); renderCard(); };
+$('#sdBanks').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const n = +b.dataset.n;
+  if (b.classList.contains('bk-open')) { openCardBank(n); return; }
+  if (!card.active) return;
+  card.active[n - 1] ^= 1;
+  renderCard();
+});
+$('#sdFiles').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) viewEntry(card.others[+b.dataset.i].e);
 });
 
 // drag & drop
@@ -812,11 +1347,14 @@ document.addEventListener('drop', async e => {
   e.preventDefault();
   dragDepth = 0; document.body.classList.remove('dragging');
   const item = e.dataTransfer.items && e.dataTransfer.items[0];
+  const file = e.dataTransfer.files[0];
   let handle = null;
   if (item && item.getAsFileSystemHandle) {
-    try { const h = await item.getAsFileSystemHandle(); if (h && h.kind === 'file') handle = h; } catch (_) {}
+    try { handle = await item.getAsFileSystemHandle(); } catch (_) {}
   }
-  const f = handle ? await handle.getFile() : e.dataTransfer.files[0];
+  if (handle && handle.kind === 'directory') { await scanCard(handle); return; }
+  if (handle && handle.kind !== 'file') handle = null;
+  const f = handle ? await handle.getFile() : file;
   if (f) loadText(await f.text(), f.name, handle);
 });
 
@@ -834,7 +1372,7 @@ document.addEventListener('keydown', e => {
     togglePlay();
   }
 });
-window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', e => { if (dirty || activeDirty()) { e.preventDefault(); e.returnValue = ''; } });
 
 // init
 buildTransport();

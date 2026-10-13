@@ -5,7 +5,8 @@ S=str(HERE/'fixtures')
 OUT=str(HERE/'out'); os.makedirs(OUT, exist_ok=True)
 url=(HERE.parent/'stolperbeats-bank-editor.html').as_uri()
 with sync_playwright() as p:
-    b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
+    exe=os.environ.get('CHROMIUM') or ('/opt/pw-browsers/chromium' if os.path.exists('/opt/pw-browsers/chromium') else None)
+    b=p.chromium.launch(executable_path=exe, args=['--autoplay-policy=no-user-gesture-required'])
     pg=b.new_page(viewport={'width':1280,'height':900}, accept_downloads=True)
     errs=[]
     pg.on('console', lambda m: errs.append(m.text) if m.type=='error' else None)

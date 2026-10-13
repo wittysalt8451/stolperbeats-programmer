@@ -80,13 +80,19 @@ Bronnen:
 ## Code
 
 - **Bestand:** `stolperbeats-bank-editor.html`, met in volgorde CSS, markup en script.
-- **Core:** `// @core-start` … `// @core-end` bevat pure functies zonder DOM: `TRACKS`, `parseBank`, `serializeBank`, `bankNumFromName`, `nameFromBankNum`, `SHUFFLES`, `hitsAt`. De tests laden dit blok los in Node. Houd het DOM-vrij.
+- **Core:** `// @core-start` … `// @core-end` bevat pure functies zonder DOM: `TRACKS`, `parseBank`, `serializeBank`, `bankNumFromName`, `nameFromBankNum`, `SHUFFLES`, `hitsAt`, en voor de kaart `classifyPath`, `parseConfig`, `setActiveInConfig`, `formatActive`, `makeZip`. De tests laden dit blok los in Node. Houd het DOM-vrij.
 - **Parser:**
   - Accepteert ook kleine letters, ontbrekende spaties of `;`, en een BOM.
   - Rapporteert onbekende regels en afwijkende lengtes. Onbekende regels worden niet teruggeschreven.
   - Regeleinde (LF/CRLF) blijft behouden.
 - **Audio:** Web Audio, synthese per track (`VOICES`). De open hat wordt gechoked door een gesloten hat of een nieuwe open hat. Lookahead-scheduler (25 ms tick, 120 ms vooruit). Shuffle wordt per tel berekend in `stepTime()`.
 - **Bestanden:** File System Access API (Chrome/Edge desktop) voor direct opslaan. Anders een `<input type=file>` en download. Drag & drop werkt met `getAsFileSystemHandle` waar dat beschikbaar is.
+- **SD-kaart:**
+  - `showDirectoryPicker` (readwrite), anders `<input webkitdirectory>` (alleen lezen, opslaan via download). Een map slepen werkt ook.
+  - Scant recursief (max. 4 niveaus, 2000 bestanden), slaat systeemmappen over. Banken en `MachineConfig.txt` tellen alleen op de root; `._*` (macOS) wordt genegeerd.
+  - Paneel: raster van 64 banken (bestand, fabrieksbank, aan/uit), opmerkingen, `MachineConfig.txt` als tabel, overige bestanden met viewer (tekst of hex).
+  - Alle schrijfacties gaan via `writeToCard()`: eerst schrijftoegang, dan eenmalig per kaart een ZIP-back-up (download), dan schrijven. Bij een kaart opent "Opslaan" niet de picker maar schrijft naar de kaart; overschrijven van een ander bestand vraagt bevestiging.
+  - `PATTERNBANK_ACTIVE`: wijzigingen blijven in het geheugen tot "MachineConfig.txt opslaan". Alleen de bits op die regel worden vervangen; de rest van het bestand blijft byte voor byte gelijk.
 
 ## Tests
 
@@ -94,7 +100,10 @@ Bronnen:
 node tests/make_fixture.mjs     # genereert tests/fixtures/PatternBank004.txt
 node tests/core_test.mjs        # parse/serialize round-trip (LF/CRLF), tolerantie, linear
 python3 tests/ui_test.py        # Playwright/Chromium: laden, bewerken, afspelen, download, volumes, mobiel; screenshots in tests/out/
+python3 tests/sd_test.py        # SD-kaart via OPFS-map en webkitdirectory: scan, back-up, schrijven, PATTERNBANK_ACTIVE
 ```
+
+Chromium: de tests gebruiken `$CHROMIUM` of `/opt/pw-browsers/chromium` als die bestaat.
 
 ## Open punten
 
@@ -103,7 +112,7 @@ python3 tests/ui_test.py        # Playwright/Chromium: laden, bewerken, afspelen
 
 ## Backlog (globaal, op volgorde)
 
-1. SD-kaartmap openen (`showDirectoryPicker`): banken tonen en wisselen, en `PATTERNBANK_ACTIVE` aan- en uitzetten. Altijd eerst een back-up (ZIP) van de map maken voordat er iets wordt geschreven.
+1. ~~SD-kaartmap openen~~ (gedaan). Volgende stap: met de scan van een echte kaart de rest van `MachineConfig.txt` en de MIDI-bankbestanden in kaart brengen en bewerkbaar maken.
 2. Exacte shuffle-preview: de MIDI-out van de module opnemen via Web MIDI. Gebruik een bank met alle steps aan en neem alle 7 × 4 × 4 combinaties op. Sla de offsets op als tabel.
 3. Web MIDI-bediening: patronen, shuffle en feeling op de module kiezen via MIDI in.
 4. Importeren: MIDI-bestand naar patroon.
