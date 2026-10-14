@@ -128,7 +128,8 @@ Bronnen:
 ## Code
 
 - **Bestand:** `index.html`, met in volgorde CSS, markup en script.
-- **Startpagina:** zonder hash in de URL kom je op de startpagina (`#panel-home`). Je komt er ook terug door op het logo te klikken. De pagina heeft een hero met een foto van de module, een Open-knop en links naar de tabs, met daaronder de volledige uitleg. `buildGuide()` vult de tabellen daarin vanuit de schema's.
+- **Startpagina:** zonder hash in de URL kom je op de startpagina (`#panel-home`). Je komt er ook terug door op het logo te klikken. De pagina is kort: een hero met een foto van de module, een Open-knop en links naar de tabs. Daaronder staan de quick start, troubleshooting (inklapbaar) en de bronnen.
+- **Info-popups:** de uitleg staat bij de onderdelen zelf, niet op de startpagina. Een `i`-knop (`class="info" data-info="sleutel"`) opent een popup met `INFO[sleutel]` (`t` is de titel, `h` is HTML of een functie die HTML geeft). In formulieren gebruik je `infoBtn(sleutel, label)`, `row(S, { info })` of `card(titel, desc, info)`. Het *inferred*-label opent `INFO.inferred`. De tabellen met golfvormen en clock dividers worden gebouwd uit `WAVEFORMS` en `CLOCKDIVS`. Nieuwe uitleg komt in `INFO`; de startpagina krijgt alleen algemene stappen.
   - De foto staat als base64-JPEG in het laatste `<script>`-blok. Lees het bestand daarom met offset/limit, want die regel is ongeveer 225 KB lang. Het bronbestand is `images/stolperbeats.png`. Na een wijziging maak je opnieuw een JPEG: `sips -Z 760 -s format jpeg -s formatOptions 70`, daarna base64.
 - **Tabs, in deze volgorde:** Patterns, Envelopes, Config en Default state. Intern heten ze `patterns`, `env`, `config` en `state`. De hash in de URL kiest de tab (`#env`).
   - Elk bestand heeft een eigen tab met Open, Save en Download.
@@ -156,10 +157,10 @@ Bronnen:
 ```
 node tests/make_fixture.mjs     # genereert tests/fixtures/PatternBank004.txt
 node tests/core_test.mjs        # round-trips (LF/CRLF, echte bestanden uit default_settings/), tolerantie, linear, instellingen, fileKind
-python3 tests/ui_test.py        # Playwright/Chromium: startpagina, patronen, afspelen, download, volumes, de drie instellingentabs, mobiel; screenshots in tests/out/
+python3 tests/ui_test.py        # Playwright/Chromium: startpagina, patronen, afspelen, download, volumes, de drie instellingentabs, info-popups, mobiel; screenshots in tests/out/
 ```
 
-Playwright staat niet globaal geïnstalleerd. Installeer het in een venv: `pip install playwright` en daarna `python -m playwright install chromium`.
+Playwright staat niet globaal geïnstalleerd. Installeer het in een venv: `pip install playwright` en daarna `python -m playwright install chromium`. Bestaat `/opt/pw-browsers/chromium` (cloudsessies) of `$CHROMIUM`, dan gebruikt de UI-test die.
 
 ## Open punten
 

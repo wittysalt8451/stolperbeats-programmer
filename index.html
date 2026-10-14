@@ -46,7 +46,7 @@ h1 span{color:var(--muted);font-weight:400}
 /* file bar */
 .filebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:12px}
 .fileinfo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;color:var(--muted);flex:1 1 auto;min-width:0}
-.fileinfo input{width:58px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.fileinfo input{width:58px;margin-left:6px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
 .fileinfo .fname{color:var(--text);font-weight:700}
 .dirty{color:var(--warn)}
 .primary{background:#2a2a2a;border-color:#4a4a4a;font-weight:700}
@@ -127,8 +127,6 @@ h1 span{color:var(--muted);font-weight:400}
   .grid{grid-column:2;grid-row:1 / span 3;align-self:center}
 }
 
-.notes{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
-.notes p{margin:0 0 6px}
 kbd{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
 .drop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;z-index:10;border:3px dashed var(--hh2)}
 body.dragging .drop{display:flex}
@@ -141,6 +139,7 @@ body.dragging .drop{display:flex}
 .form.wide{max-width:none}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px;min-width:0}
 .card h2{font-size:15px;margin:0}
+.card h2 .info{vertical-align:2px}
 .cdesc{margin:3px 0 0;font-size:12px;color:var(--muted)}
 .field{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 18px;align-items:center;padding:10px 0 2px;margin-top:8px;border-top:1px solid var(--line)}
 .field.stack{grid-template-columns:minmax(0,1fr)}
@@ -206,14 +205,32 @@ body.dragging .drop{display:flex}
 .guide ul,.guide ol{margin:0 0 10px;padding-left:22px}
 .guide li{margin-bottom:4px}
 .guide a{color:var(--hh2)}
-.guide code{font:12px var(--mono);background:var(--panel2);padding:1px 4px;border-radius:3px;overflow-wrap:anywhere}
-.guide td code{overflow-wrap:normal;white-space:nowrap}
-.guide .tw{overflow-x:auto;margin:8px 0 12px}
-.guide table{border-collapse:collapse;width:100%;font-size:13px}
-.guide th,.guide td{border-bottom:1px solid var(--line);padding:6px 10px 6px 0;text-align:left;vertical-align:top}
-.guide th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:400}
-.guide td svg{display:block;color:var(--hh2)}
-.toc{display:flex;flex-wrap:wrap;gap:4px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:13px}
+.guide details{border-bottom:1px solid var(--line);padding:8px 0}
+.guide summary{cursor:pointer;color:var(--text)}
+.guide details p{margin:8px 0 2px}
+.sources{margin-top:26px;font-size:13px}
+
+/* info popups */
+.info,.info-demo{width:17px;height:17px;padding:0;margin-left:6px;border-radius:50%;border:1px solid #555;background:none;color:var(--muted);
+  font:italic 700 11px/15px Georgia,"Times New Roman",serif;text-transform:none;letter-spacing:0;display:inline-block;text-align:center;vertical-align:1px;position:relative;flex:none}
+.info::after{content:"";position:absolute;inset:-8px}
+.info:hover,.info[aria-expanded="true"]{color:var(--text);border-color:var(--text)}
+.lbl .info{margin-top:-3px;vertical-align:0}
+.tip{position:absolute;z-index:20;width:min(400px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:#212121;border:1px solid #474747;border-radius:8px;
+  padding:10px 12px 4px;box-shadow:0 10px 30px rgba(0,0,0,.55);font-size:13px;line-height:1.5;color:#d4d4d4}
+.tip:focus{outline:none}
+.tip h4{margin:0 0 6px;font-size:13px;color:var(--text)}
+.tip p{margin:0 0 8px}
+.tip ul{margin:0 0 8px;padding-left:18px}
+.tip li{margin-bottom:3px}
+.tip b{color:var(--text)}
+.tip code,.guide code{font:12px var(--mono);background:var(--panel2);padding:1px 4px;border-radius:3px;overflow-wrap:anywhere}
+.tip table{border-collapse:collapse;width:100%;margin:0 0 8px;font-size:12px}
+.tip td,.tip th{border-bottom:1px solid var(--line);padding:4px 8px 4px 0;text-align:left;vertical-align:top}
+.tip th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:400}
+.tip td svg{display:block;color:var(--hh2)}
+.tip td code{white-space:nowrap}
+button.tag{background:none;font:inherit;font-size:10px;line-height:inherit}
 
 /* start page */
 .logo{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
@@ -281,146 +298,37 @@ body.dragging .drop{display:flex}
     </div>
 
     <div class="guide">
-      <nav class="toc" aria-label="Guide contents">
-        <a href="#g-start">Quick start</a>
-        <a href="#g-browsers">Browsers</a>
-        <a href="#g-files">Files on the card</a>
-        <a href="#g-patterns">Patterns</a>
-        <a href="#g-preview">Preview</a>
-        <a href="#g-config">Config</a>
-        <a href="#g-env">Envelopes</a>
-        <a href="#g-state">Default state</a>
-        <a href="#g-values">Undocumented values</a>
-        <a href="#g-keys">Shortcuts</a>
-        <a href="#g-trouble">Troubleshooting</a>
-        <a href="#g-sources">Sources</a>
-      </nav>
-
       <h2 id="g-start">Quick start</h2>
       <ol>
-        <li>Press stop on the module, then switch off your case. The module writes to the card when you stop the sequencer, so stop first.</li>
-        <li>Take the SD card out and put it in your computer. It shows up as a drive (on a Mac often called NO NAME).</li>
-        <li>Copy all files on the card to a folder on your computer. That is your backup.</li>
-        <li>Click <b>Open</b>, or drag files from Finder or Explorer onto this page. You can open several files at once; each file goes to its own tab.</li>
-        <li>Make your changes and click <b>Save</b> (<kbd>Ctrl/Cmd+S</kbd>). In Chrome and Edge this writes straight back to the file on the card.</li>
-        <li>Eject the card properly, put it back in the module and switch on. The module reads the card when it starts.</li>
+        <li>Press stop on the module, then switch off your case. The module writes to the card when you stop the sequencer.</li>
+        <li>Put the SD card in your computer and copy all files to a folder. That is your backup.</li>
+        <li>Click <b>Open files</b>, or drop files on this page. Each file goes to its own tab.</li>
+        <li>Make your changes and click <b>Save</b> (<kbd>Ctrl/Cmd+S</kbd>). Chrome and Edge write straight to the card; other browsers download the file.<button class="info" data-info="save" aria-label="About opening and saving" aria-expanded="false">i</button></li>
+        <li>Eject the card, put it back in the module and switch on. The module reads the card when it starts.</li>
       </ol>
-
-      <h2 id="g-browsers">Browsers</h2>
-      <div class="tw"><table>
-        <tr><th>Browser</th><th>Open</th><th>Save</th></tr>
-        <tr><td>Chrome, Edge (desktop)</td><td>Open button or drag &amp; drop</td><td>Writes directly to the file you opened. The first time, the browser asks for permission.</td></tr>
-        <tr><td>Safari, Firefox</td><td>Open button or drag &amp; drop</td><td>Downloads the file. Copy it to the root of the card and replace the old file.</td></tr>
-      </table></div>
-      <p>The module only reads exact file names. Browsers add “ (1)” to a download when a file with that name already exists in your downloads folder. Rename the file before you copy it to the card.</p>
-
-      <h2 id="g-files">Files on the card</h2>
-      <div class="tw"><table>
-        <tr><th>File</th><th>Contents</th><th>Tab</th></tr>
-        <tr><td><code>PatternBank000.txt</code> … <code>PatternBank063.txt</code></td><td>24 patterns for each of the six tracks. 000 is bank 1 on the module, 004 is bank 5.</td><td>Patterns</td></tr>
-        <tr><td><code>MachineConfig.txt</code></td><td>Active banks, clock and MIDI options, firmware build.</td><td>Config</td></tr>
-        <tr><td><code>EnvelopeSettings.txt</code></td><td>Waveform, clock divider and range of ENV 1 and ENV 2.</td><td>Envelopes</td></tr>
-        <tr><td><code>MachineState.txt</code></td><td>Tempo, timing, shuffle, feeling, bank, patterns, mutes, Sync and MIDI bank. The module starts with this.</td><td>Default state</td></tr>
-        <tr><td><code>MIDIMap000.txt</code> … <code>MIDIMap031.txt</code></td><td>MIDI out mapping (channel, note, velocity, duration per track) for the 32 MIDI banks.</td><td>Not yet</td></tr>
-      </table></div>
-      <p>All files are plain text. The module writes them with Windows line endings (CRLF). This editor keeps the line endings of the file you open, and uses CRLF for a new bank.</p>
-      <p>The module reads the card when it starts. It writes patterns, settings and MIDI maps whenever you stop the sequencer. So only swap the card with the module switched off, and stop the sequencer before you switch off.</p>
-      <p><b>Factory reset.</b> Delete all files from the card, or use an empty FAT32 card. The module writes factory files at the next start.</p>
-
-      <h2 id="g-patterns">Patterns</h2>
-      <p>A bank has 24 patterns (PTN0–PTN23) for each track. Kick and Snare patterns are 4 bars (64 steps). Hihat 1, Hihat 2, Perc 1 and Perc 2 are 1 bar (16 steps) that loops. One step is a 16th note in 4/4, before shuffle.</p>
-      <ul>
-        <li>Pick a pattern with the numbered strip of a track. The strip at the top picks the same pattern for all tracks. A dot means the pattern has steps.</li>
-        <li>Click a step to turn it on or off. Drag across steps to set or clear several at once. With the keyboard: Tab to a step and press Enter.</li>
-        <li><b>Copy</b> and <b>Paste</b> work across tracks. Pasting 4 bars into a 1-bar track takes the first bar. Pasting 1 bar into a 4-bar track repeats it.</li>
-        <li><b>Bar 1 → 2–4</b> copies the first bar of Kick or Snare to the other three bars.</li>
-        <li><b>M</b> mutes and <b>S</b> solos a track in the preview. Click a track name to hear its sound.</li>
-        <li><b>Bank on module</b> sets the file name: bank 5 is <code>PatternBank004.txt</code>. <b>New</b> starts an empty bank with that name.</li>
-        <li>A bank must be active to be reachable with the ◄ Bank ► buttons. Turn it on in the Config tab.</li>
-      </ul>
-
-      <h3 id="g-preview">Preview</h3>
-      <p>The preview plays the bank with simple synthesized sounds. It is an approximation of the module:</p>
-      <ul>
-        <li><b>Shuffle:</b> steps fall on the positions of the shuffle display in the manual, per beat of 4 steps. The manual itself calls that display a visual approximation.</li>
-        <li><b>Timing</b> (Trip, Shake, Push, Clave) is not in the preview.</li>
-        <li><b>Feeling:</b> Flam and Slop delay kick and snare a little, Slop also the hihats. Rolls replaces Hihat 2 with a burst.</li>
-        <li><b>Linear:</b> snare beats kick, and both beat the hihats. Since firmware 157 the module also applies this to Perc 1 and 2, and lets Hihat 2 beat Hihat 1 and Perc 2 beat Perc 1 (Snare &gt; Kick &gt; Hihat 2 &gt; Hihat 1, and Snare &gt; Kick &gt; Perc 2 &gt; Perc 1). The preview does not do that yet.</li>
-        <li><b>Tempo:</b> 15–250 bpm, like the module.</li>
-      </ul>
-
-      <h2 id="g-config">Config</h2>
-      <p>Settings for the whole machine. The module reads them when it starts. Switches are 1 (on) or 0 (off) in the file.</p>
-      <div class="tw"><table id="g-config-table"></table></div>
-      <p>The module ships with banks 1–4 active. Firmware 157 and 160 added factory banks 5 and 6; you may have to activate those yourself. The last line of the file shows the firmware build.</p>
-
-      <h2 id="g-env">Envelopes</h2>
-      <p>The two Env outputs give a tempo-synced 10 V CV. On the module, press and release the Subdiv encoder for 2 seconds to enter the ENV options. The upper encoder row (starting at Kick) sets ENV 1, the lower row (starting at Perc 1) sets ENV 2: waveform, clock divider, lower and upper boundary.</p>
-      <h3>Waveforms</h3>
-      <div class="tw"><table id="g-wave-table"></table></div>
-      <h3>Clock dividers</h3>
-      <p>An envelope either follows the bar or a beat, or restarts with a trigger of one of the tracks. It follows the shuffle, timing and feeling you select.</p>
-      <div class="tw"><table id="g-cd-table"></table></div>
-      <h3>Range</h3>
-      <ul>
-        <li><b>x4 to P2</b> share one range. The upper boundary is the maximum and the lower boundary the offset; the envelope moves between the two. In the file: <code>ENV1_LFO_VEL</code> (upper) and <code>ENV1_LFO_LOW_VEL</code> (lower).</li>
-        <li><b>:bd to :P2</b> have a setting per instrument. Upper is the accented velocity and lower the non-accented velocity. The envelope moves between zero and upper on an accent, and between zero and lower otherwise. In the file: <code>ENV1_KICK_VEL</code> and <code>ENV1_KICK_LOW_VEL</code>, and so on.</li>
-        <li>Values run from 0 to 127. On the module one LED is 8 steps.</li>
-      </ul>
-      <p>The plot in the Envelopes tab is a sketch of shape and range, not a measurement of the output.</p>
-
-      <h2 id="g-state">Default state</h2>
-      <p>The module saves its current state in <code>MachineState.txt</code> when you stop the sequencer, and starts with that state. Edit it to choose how the module starts.</p>
-      <p>When you play and stop on the module, it overwrites this file. <code>WRITE_MACHINE_STATE</code> in MachineConfig.txt probably turns that off, so the module always starts with your state. That setting is not documented; check it on your module.</p>
-      <div class="tw"><table>
-        <tr><th>Key</th><th>Meaning</th><th>Values in the file</th></tr>
-        <tr><td><code>TEMPO</code></td><td>Tempo</td><td>15–250 bpm</td></tr>
-        <tr><td><code>TIMING</code></td><td>Timing</td><td>0 Trip, 1 Shake, 2 Push, 3 Clave <span class="tag">inferred</span></td></tr>
-        <tr><td><code>SHUFFLE</code></td><td>Shuffle</td><td>0–6 for shuffle 1–7 <span class="tag">inferred</span></td></tr>
-        <tr><td><code>FEEL</code></td><td>Feeling</td><td>0 Tight, 1 Rolls, 2 Flam, 3 Slop <span class="tag">inferred</span></td></tr>
-        <tr><td><code>LINEAR</code></td><td>Linear</td><td>0 off, 1 on</td></tr>
-        <tr><td><code>BANK</code></td><td>Pattern bank</td><td>0–63 for bank 1–64 <span class="tag">inferred</span></td></tr>
-        <tr><td><code>KICK</code> … <code>PERC2</code></td><td>Pattern per track</td><td>0–23 for PTN0–PTN23</td></tr>
-        <tr><td><code>SUBDIV</code></td><td>Subdiv output</td><td>0 shuffled 16ths, 1 n-tuplet <span class="tag">inferred</span></td></tr>
-        <tr><td><code>SYNCIN</code></td><td>Sync In divider</td><td>0–8 for 1, 2, 3, 4, 6, 8, 12, 16, 24 ppqn <span class="tag">inferred</span></td></tr>
-        <tr><td><code>SYNCOUT</code></td><td>Sync Out divider</td><td>1–10, 12, 16, 24 ppqn or x1, x2, x4 bars. The order in the file is unknown.</td></tr>
-        <tr><td><code>KICKMUTE</code> … <code>SUBDIVMUTE</code></td><td>Mute per track</td><td>0 playing, 1 muted</td></tr>
-        <tr><td><code>MIDIBANK</code></td><td>MIDI out map</td><td>0–31 for MIDIMap000–MIDIMap031 <span class="tag">inferred</span></td></tr>
-      </table></div>
-
-      <h2 id="g-values">Undocumented values</h2>
-      <p>The manual describes the settings, but not the numbers in the files. This editor assumes that values count from 0, in the order of the manual and the panel. Pattern numbers (0 is PTN0) and MIDI channels in the MIDI maps (0 is channel 1) work that way too. Fields that rely on this assumption are marked <span class="tag">inferred</span>.</p>
-      <p>To check a value: set it here, save, start the module and compare with the display. For example, set ENV 1 to Ramp down and check that the first waveform is lit in the ENV options.</p>
-
-      <h2 id="g-keys">Shortcuts</h2>
-      <ul>
-        <li><kbd>Space</kbd> start/stop the preview (Patterns tab)</li>
-        <li><kbd>Ctrl/Cmd+S</kbd> save the file of the current tab</li>
-        <li><kbd>Ctrl/Cmd+Z</kbd> undo (Patterns tab)</li>
-        <li><kbd>←</kbd> <kbd>→</kbd> switch tabs when a tab has focus</li>
-      </ul>
+      <p class="muted">Look for <span class="info-demo">i</span> next to a setting for what it does and how the module handles it. <code>MIDIMap000–031.txt</code> (MIDI out maps) cannot be edited yet.</p>
 
       <h2 id="g-trouble">Troubleshooting</h2>
-      <ul>
-        <li><b>A bank does not show up on the module.</b> Activate it in the Config tab. Check the file name: <code>PatternBank</code> plus three digits, <code>.txt</code>, in the root of the card.</li>
-        <li><b>My changes are gone.</b> The module rewrites the card when you stop the sequencer. Edit the card with the module switched off.</li>
-        <li><b>Hidden files on the card.</b> macOS writes files like <code>._PatternBank004.txt</code>, <code>.Spotlight-V100</code> and <code>.fseventsd</code> to the card. The module probably ignores them. To remove the <code>._</code> files, run <code>dot_clean -m "/Volumes/NO NAME"</code> in Terminal (use the name of your card).</li>
-        <li><b>Saving fails.</b> The card may be locked (switch on the side of the card), or the browser lost permission. The editor then downloads the file instead.</li>
-      </ul>
+      <details><summary>A bank does not show up on the module</summary>
+        <p>Activate it in the Config tab. The file name must be <code>PatternBank</code> plus three digits and <code>.txt</code>, in the root of the card. A browser download may be called <code>PatternBank004 (1).txt</code>; rename it.</p></details>
+      <details><summary>My changes are gone</summary>
+        <p>The module rewrites the card when you stop the sequencer. Edit the card with the module switched off.</p></details>
+      <details><summary>Saving fails</summary>
+        <p>The card may be locked (switch on the side of the card), or the browser lost permission. The editor then downloads the file instead.</p></details>
+      <details><summary>Hidden files on the card</summary>
+        <p>macOS writes files like <code>._PatternBank004.txt</code>, <code>.Spotlight-V100</code> and <code>.fseventsd</code> to the card. The module probably ignores them. To remove the <code>._</code> files, run <code>dot_clean -m "/Volumes/NO NAME"</code> in Terminal (use the name of your card).</p></details>
+      <details><summary>Factory reset</summary>
+        <p>Delete all files from the card, or use an empty FAT32 card. The module writes factory files at the next start.</p></details>
 
-      <h2 id="g-sources">Sources</h2>
-      <ul>
-        <li><a href="https://makingsoundmachines.com/stolperbeats/manual/" target="_blank" rel="noopener">Stolperbeats manual</a> (Making Sound Machines)</li>
-        <li><a href="https://makingsoundmachines.com/stolperbeats/quickstart/Making_Sound_Machines_Stolperbeats_Quickstart.pdf" target="_blank" rel="noopener">Quickstart guide (PDF)</a></li>
-      </ul>
+      <p class="sources muted">Sources: <a href="https://makingsoundmachines.com/stolperbeats/manual/" target="_blank" rel="noopener">Stolperbeats manual</a> · <a href="https://makingsoundmachines.com/stolperbeats/quickstart/Making_Sound_Machines_Stolperbeats_Quickstart.pdf" target="_blank" rel="noopener">Quickstart guide (PDF)</a> (Making Sound Machines)</p>
     </div>
   </section>
 
   <section class="panel" id="panel-patterns" role="tabpanel" aria-labelledby="tab-patterns" hidden>
     <div class="filebar">
       <span class="fileinfo">
-        <label>Bank on module <input id="bankNum" type="number" min="1" max="64" value="5"></label>
-        <span>→ <span class="fname" id="fileName">PatternBank004.txt</span></span>
+        <label for="bankNum">Bank on module</label><input id="bankNum" type="number" min="1" max="64" value="5">
+        <span>→ <span class="fname" id="fileName">PatternBank004.txt</span><button class="info" data-info="bank" aria-label="About bank numbers" aria-expanded="false">i</button></span>
         <span class="dirty" id="dirty"></span>
       </span>
       <button id="btnOpen" class="primary">Open</button>
@@ -428,12 +336,13 @@ body.dragging .drop{display:flex}
       <button id="btnDownload">Download</button>
       <button id="btnNew">New</button>
       <button id="btnUndo" title="Ctrl/Cmd+Z">Undo</button>
+      <button class="info" data-info="save" aria-label="About opening and saving" aria-expanded="false">i</button>
     </div>
 
     <section class="transport">
-      <div class="playwrap"><span class="lbl">&nbsp;</span><button id="btnPlay" class="play" aria-label="Start/stop">▶</button></div>
+      <div class="playwrap"><span class="lbl">Preview<button class="info" data-info="preview" aria-label="About the preview" aria-expanded="false">i</button></span><button id="btnPlay" class="play" aria-label="Start/stop">▶</button></div>
       <div>
-        <span class="lbl">Tempo</span>
+        <span class="lbl">Tempo<button class="info" data-info="tempo" aria-label="About Tempo" aria-expanded="false">i</button></span>
         <div class="tempo">
           <button id="tempoDown" aria-label="Tempo down">−</button>
           <input id="tempo" type="number" min="15" max="250" value="90">
@@ -442,40 +351,35 @@ body.dragging .drop{display:flex}
         </div>
       </div>
       <div>
-        <span class="lbl">Shuffle</span>
+        <span class="lbl">Shuffle<button class="info" data-info="shuffle" aria-label="About Shuffle" aria-expanded="false">i</button></span>
         <div class="seg" id="shuffleBtns"></div>
         <div class="shviz" id="shuffleViz"></div>
       </div>
       <div>
-        <span class="lbl">Feeling</span>
+        <span class="lbl">Feeling<button class="info" data-info="feeling" aria-label="About Feeling" aria-expanded="false">i</button></span>
         <div class="seg" id="feelBtns"></div>
       </div>
       <div class="opts">
-        <div><span class="lbl">&nbsp;</span><button id="btnLinear" aria-pressed="false" title="Snare beats kick, both beat the hihats">Linear</button></div>
+        <div><span class="lbl">&nbsp;</span><button id="btnLinear" aria-pressed="false" title="Mutes steps so that one instrument plays at a time">Linear</button><button class="info" data-info="linear" aria-label="About Linear" aria-expanded="false">i</button></div>
         <label><span class="lbl">Volume</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.8"></label>
       </div>
     </section>
 
     <section class="all">
-      <span class="lbl">Pattern for all tracks</span>
+      <span class="lbl">Pattern for all tracks<button class="info" data-info="patterns" aria-label="About patterns and steps" aria-expanded="false">i</button></span>
       <div class="strip" id="allStrip"></div>
     </section>
 
     <div id="tracks"></div>
-
-    <div class="notes">
-      <p><b>Preview.</b> An approximation. Shuffle uses the step positions from the shuffle display in the manual. Timing (Trip/Shake/Push/Clave) is not included. Feeling and Linear are simplified. The start page has the details (click Stolperbeats editor at the top).</p>
-      <p><b>On the module.</b> PatternBank004.txt is bank 5. A bank is only reachable with the Bank buttons when it is active (Config tab). Only swap the SD card with the module switched off.</p>
-      <p><b>Shortcuts.</b> <kbd>Space</kbd> start/stop · <kbd>Ctrl/Cmd+S</kbd> save · <kbd>Ctrl/Cmd+Z</kbd> undo · click a track name to hear it · drag across steps to set several · drop files on the page to open them.</p>
-    </div>
   </section>
 
   <section class="panel" id="panel-env" role="tabpanel" aria-labelledby="tab-env" hidden>
     <div class="filebar">
-      <span class="fileinfo"><span class="fname">EnvelopeSettings.txt</span><span class="dirty"></span></span>
+      <span class="fileinfo"><span><span class="fname">EnvelopeSettings.txt</span><button class="info" data-info="file-env" aria-label="About EnvelopeSettings.txt" aria-expanded="false">i</button></span><span class="dirty"></span></span>
       <button class="primary" data-act="open">Open</button>
       <button class="primary" data-act="save" title="Ctrl/Cmd+S" disabled>Save</button>
       <button data-act="download" disabled>Download</button>
+      <button class="info" data-info="save" aria-label="About opening and saving" aria-expanded="false">i</button>
     </div>
     <div class="empty">
       <p>Open <b>EnvelopeSettings.txt</b> from the root of the SD card, or drop it on this page.</p>
@@ -487,10 +391,11 @@ body.dragging .drop{display:flex}
 
   <section class="panel" id="panel-config" role="tabpanel" aria-labelledby="tab-config" hidden>
     <div class="filebar">
-      <span class="fileinfo"><span class="fname">MachineConfig.txt</span><span class="dirty"></span></span>
+      <span class="fileinfo"><span><span class="fname">MachineConfig.txt</span><button class="info" data-info="file-config" aria-label="About MachineConfig.txt" aria-expanded="false">i</button></span><span class="dirty"></span></span>
       <button class="primary" data-act="open">Open</button>
       <button class="primary" data-act="save" title="Ctrl/Cmd+S" disabled>Save</button>
       <button data-act="download" disabled>Download</button>
+      <button class="info" data-info="save" aria-label="About opening and saving" aria-expanded="false">i</button>
     </div>
     <div class="empty">
       <p>Open <b>MachineConfig.txt</b> from the root of the SD card, or drop it on this page.</p>
@@ -502,10 +407,11 @@ body.dragging .drop{display:flex}
 
   <section class="panel" id="panel-state" role="tabpanel" aria-labelledby="tab-state" hidden>
     <div class="filebar">
-      <span class="fileinfo"><span class="fname">MachineState.txt</span><span class="dirty"></span></span>
+      <span class="fileinfo"><span><span class="fname">MachineState.txt</span><button class="info" data-info="file-state" aria-label="About MachineState.txt" aria-expanded="false">i</button></span><span class="dirty"></span></span>
       <button class="primary" data-act="open">Open</button>
       <button class="primary" data-act="save" title="Ctrl/Cmd+S" disabled>Save</button>
       <button data-act="download" disabled>Download</button>
+      <button class="info" data-info="save" aria-label="About opening and saving" aria-expanded="false">i</button>
     </div>
     <div class="empty">
       <p>Open <b>MachineState.txt</b> from the root of the SD card, or drop it on this page.</p>
@@ -722,10 +628,11 @@ $('#noticeClose').onclick = () => { $('#notice').hidden = true; };
 const TABS = ['patterns', 'env', 'config', 'state'];
 let tab = 'home';
 
-// 'home' is the start page with the guide (click the logo); the others are tabs.
+// 'home' is the start page (click the logo); the others are tabs.
 function showTab(id) {
   if (!TABS.includes(id)) id = 'home';
   tab = id;
+  closeTip();
   $('#panel-home').hidden = id !== 'home';
   for (const t of TABS) {
     $('#panel-' + t).hidden = t !== id;
@@ -755,11 +662,6 @@ $('.tabs').addEventListener('keydown', e => {
   const next = i < 0 ? TABS[0] : TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
   showTab(next);
   $('#tab-' + next).focus();
-});
-$('.toc').addEventListener('click', e => {
-  const a = e.target.closest('a'); if (!a) return;
-  e.preventDefault();
-  $(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // ---------- audio ----------
@@ -962,9 +864,9 @@ function buildTracks() {
       </div>
       <div class="strip"></div>
       <div class="tools">
-        <button data-act="copy">Copy</button>
-        <button data-act="paste">Paste</button>
-        <button data-act="clear">Clear</button>
+        <button data-act="copy" title="Copy this pattern">Copy</button>
+        <button data-act="paste" title="Paste into this pattern; 4 bars into 1 bar takes bar 1, 1 bar into 4 bars repeats it">Paste</button>
+        <button data-act="clear" title="Clear all steps of this pattern">Clear</button>
         ${t.len === 64 ? '<button data-act="fill" title="Copy bar 1 to bars 2–4">Bar 1 → 2–4</button>' : ''}
       </div>
       <div class="grid"></div>`;
@@ -1157,6 +1059,10 @@ $('#vol').addEventListener('input', e => {
 
 // ---------- settings files ----------
 const INFERRED_TIP = 'Not documented by Making Sound Machines. Inferred from the order in the manual and on the panel.';
+function inferredTag(text) {
+  return el('button', { class: 'tag', type: 'button', 'data-info': 'inferred', title: INFERRED_TIP, 'aria-expanded': 'false',
+    text: typeof text === 'string' ? text : 'inferred' });
+}
 
 const CONFIG_GROUPS = [
   { h: 'Display and encoders', fields: [
@@ -1237,8 +1143,8 @@ function setSettingsDirty(S, v) {
 }
 
 // Controls. Each one reads its key from the file and writes changes back with put().
-function card(title, desc) {
-  return el('section', { class: 'card' }, el('h2', { text: title }), desc ? el('p', { class: 'cdesc', text: desc }) : null);
+function card(title, desc, info) {
+  return el('section', { class: 'card' }, el('h2', {}, title, info ? infoBtn(info, title) : null), desc ? el('p', { class: 'cdesc', text: desc }) : null);
 }
 function ctl(S, key, mk) {
   S.keys.add(key);
@@ -1249,8 +1155,9 @@ function row(S, def, mk = () => switchCtl(S, def.key, def.label)) {
   const r = el('div', { class: 'field' + (def.stack ? ' stack' : '') },
     el('div', { class: 'flabel' },
       el('b', { text: def.label }),
+      def.info ? infoBtn(def.info, def.label) : null,
       el('code', { class: 'key', text: def.key }),
-      def.inferred ? el('span', { class: 'tag', text: typeof def.inferred === 'string' ? def.inferred : 'inferred', title: INFERRED_TIP }) : null,
+      def.inferred ? inferredTag(def.inferred) : null,
       def.desc ? el('p', { class: 'desc', text: def.desc }) : null,
       warn),
     el('div', { class: 'fctl' }, ctl(S, def.key, mk)));
@@ -1317,7 +1224,7 @@ function numCtl(S, key, min, max, unit = '') {
 }
 
 function buildConfig(S, form) {
-  const banks = card('Pattern banks', 'Active banks can be reached with the ◄ Bank ► buttons; inactive banks are skipped. Lit means active.');
+  const banks = card('Pattern banks', 'Active banks can be reached with the ◄ Bank ► buttons; inactive banks are skipped. Lit means active.', 'banks');
   const btns = [];
   const info = el('p', { class: 'bankinfo' });
   banks.append(el('code', { class: 'key', text: 'PATTERNBANK_ACTIVE' }), ctl(S, 'PATTERNBANK_ACTIVE', () => {
@@ -1400,13 +1307,13 @@ function envCard(S, n, syncs) {
   const P = `ENV${n}_`;
   const c = card(`ENV ${n}`, n === 1 ? 'Upper encoder row in the ENV options (from Kick).' : 'Lower encoder row in the ENV options (from Perc 1).');
   const waveName = el('span', { class: 'muted' });
-  c.append(row(S, { key: P + 'WAVEFORM', label: 'Waveform', inferred: true, stack: true }, () => {
+  c.append(row(S, { key: P + 'WAVEFORM', label: 'Waveform', info: 'waveform', inferred: true, stack: true }, () => {
     const s = segCtl(S, P + 'WAVEFORM', WAVEFORMS.map((name, i) => ({ v: String(i), title: `${name} (${i})`, icon: waveIcon(i) })), 'var(--hh2)');
     s.append(waveName);
     return s;
   }));
   const cdDesc = el('p', { class: 'desc' });
-  c.append(row(S, { key: P + 'CLOCKDIV', label: 'Clock divider', inferred: true, stack: true }, () => el('div', {},
+  c.append(row(S, { key: P + 'CLOCKDIV', label: 'Clock divider', info: 'clockdiv', inferred: true, stack: true }, () => el('div', {},
     segCtl(S, P + 'CLOCKDIV', CLOCKDIVS.map((d, i) => ({ v: String(i), label: d.label, title: `${d.d} (${i})`, brk: i === 5 || i === 11 }))),
     cdDesc)));
 
@@ -1415,7 +1322,7 @@ function envCard(S, n, syncs) {
   c.append(el('div', { class: 'envplot' }, plot, caption));
 
   const vel = key => ctl(S, P + key, () => numCtl(S, P + key, 0, 127));
-  const shared = el('div', { class: 'velgrp' }, el('h3', { text: 'Range for x4 – P2' }),
+  const shared = el('div', { class: 'velgrp' }, el('h3', {}, 'Range for x4 – P2', infoBtn('range', 'Range')),
     el('div', { class: 'vtable' },
       el('span'), el('span', { class: 'vh', text: 'Lower (offset)' }), el('span', { class: 'vh', text: 'Upper (maximum)' }),
       el('span', { class: 'vname cur', text: 'All' }), vel('LFO_LOW_VEL'), vel('LFO_VEL')));
@@ -1426,7 +1333,7 @@ function envCard(S, n, syncs) {
     names[t.id] = el('span', { class: 'vname', text: t.name });
     table.append(names[t.id], vel(t.id + '_LOW_VEL'), vel(t.id + '_VEL'));
   }
-  const per = el('div', { class: 'velgrp' }, el('h3', { text: 'Velocity for :bd – :P2, per instrument' }), table);
+  const per = el('div', { class: 'velgrp' }, el('h3', {}, 'Velocity for :bd – :P2, per instrument', infoBtn('range', 'Range')), table);
   c.append(shared, per);
 
   syncs.push(() => {
@@ -1459,15 +1366,15 @@ function buildState(S, form) {
   const t = card('Transport', 'The module starts with these values.');
   t.append(
     row(S, { key: 'TEMPO', label: 'Tempo', desc: '15–250 bpm.' }, () => numCtl(S, 'TEMPO', 15, 250, 'bpm')),
-    row(S, { key: 'TIMING', label: 'Timing', inferred: true }, () =>
+    row(S, { key: 'TIMING', label: 'Timing', info: 'timing', inferred: true }, () =>
       segCtl(S, 'TIMING', ['Trip', 'Shake', 'Push', 'Clave'].map((label, i) => ({ v: String(i), label })), 'var(--hh1)')),
-    row(S, { key: 'SHUFFLE', label: 'Shuffle', inferred: true, desc: 'Shuffle 1–7. The buttons show the subdivisions per beat, as in the Patterns tab.' }, () => {
+    row(S, { key: 'SHUFFLE', label: 'Shuffle', info: 'shuffle', inferred: true, desc: 'Shuffle 1–7. The buttons show the subdivisions per beat, as in the Patterns tab.' }, () => {
       const s = segCtl(S, 'SHUFFLE', SHUFFLES.map((sh, i) => ({ v: String(i), label: String(sh.n), title: `Shuffle ${i + 1}: ${sh.d}` })));
       return el('div', {}, s, shDesc);
     }),
-    row(S, { key: 'FEEL', label: 'Feeling', inferred: true }, () =>
+    row(S, { key: 'FEEL', label: 'Feeling', info: 'feeling', inferred: true }, () =>
       segCtl(S, 'FEEL', FEELINGS.map((f, i) => ({ v: String(i), label: f.name, c: f.c })))),
-    row(S, { key: 'LINEAR', label: 'Linear' }));
+    row(S, { key: 'LINEAR', label: 'Linear', info: 'linear' }));
 
   const b = card('Bank and patterns');
   const bankRow = row(S, { key: 'BANK', label: 'Bank', inferred: true }, () =>
@@ -1555,17 +1462,137 @@ for (const S of Object.values(SET)) {
   });
 }
 
-function buildGuide() {
-  const fields = [{ key: 'PATTERNBANK_ACTIVE', label: 'Pattern banks', desc: '4 groups of 16 bits, one per bank. The first bit is bank 1. Only active banks (1) are reachable with ◄ Bank ►.' },
-    ...CONFIG_GROUPS.flatMap(g => g.fields),
-    { key: 'FIRMWARE_BUILD', label: 'Firmware build', desc: 'Written by the module.' }];
-  $('#g-config-table').innerHTML = '<tr><th>Setting</th><th>Meaning</th></tr>' + fields.map(f =>
-    `<tr><td>${esc(f.label)}<br><code>${f.key}</code>${f.inferred ? ' <span class="tag">inferred</span>' : ''}</td><td>${esc(f.desc)}</td></tr>`).join('');
-  $('#g-wave-table').innerHTML = '<tr><th></th><th>Value</th><th>Waveform</th></tr>' + WAVEFORMS.map((name, i) =>
-    `<tr><td>${waveIcon(i)}</td><td>${i}</td><td>${esc(name)}${i === 8 ? '. x4–P2: alternates between upper and lower boundary. :bd–:P2: stepped velocity values.' : ''}</td></tr>`).join('');
-  $('#g-cd-table').innerHTML = '<tr><th>Display</th><th>Value</th><th>Behaviour</th></tr>' + CLOCKDIVS.map((d, i) =>
-    `<tr><td><code>${esc(d.label)}</code></td><td>${i}</td><td>${esc(d.d)}</td></tr>`).join('');
+// ---------- info popups ----------
+// An info button (class "info", data-info=key) opens a popup with INFO[key]: { t: title, h: HTML or a function that returns it }.
+const INFO = {
+  save: { t: 'Opening and saving', h: `
+    <ul>
+      <li><b>Chrome, Edge (desktop):</b> Save writes straight to the file you opened. The first time, the browser asks for permission.</li>
+      <li><b>Safari, Firefox:</b> Save downloads the file. Copy it to the root of the card and replace the old file.</li>
+    </ul>
+    <p>The module only reads exact file names. A browser adds “ (1)” to a download when the name already exists in your downloads folder; rename the file before you copy it.</p>
+    <p>Open and drag &amp; drop accept several files at once. Each goes to its own tab. Line endings are kept; the module writes CRLF.</p>
+    <p>If saving fails, the card may be locked or the browser lost permission. The file is then downloaded.</p>` },
+  bank: { t: 'Bank number and file name', h: `
+    <p>The file name sets the bank: <code>PatternBank000.txt</code> is bank 1 on the module, <code>PatternBank004.txt</code> bank 5. There are 64 banks (000–063), each in the root of the card.</p>
+    <p>Change the number to save the bank under another name. <b>New</b> starts an empty bank with this name.</p>
+    <p>A bank is only reachable with ◄ Bank ► when it is active in <code>MachineConfig.txt</code> (Config tab).</p>` },
+  preview: { t: 'Preview', h: `
+    <p>Plays the bank with simple synthesized sounds. It approximates the module: see the info at Shuffle, Feeling and Linear. Timing (Trip, Shake, Push, Clave) is not in the preview.</p>
+    <ul>
+      <li><kbd>Space</kbd> starts and stops.</li>
+      <li>Click a track name to hear its sound. <b>M</b> mutes and <b>S</b> solos a track; that is not saved.</li>
+    </ul>` },
+  tempo: { t: 'Tempo', h: `<p>15–250 bpm, as on the module. One step is a 16th note in 4/4, before shuffle. Only for the preview; the start tempo of the module is in <code>MachineState.txt</code> (Default state tab).</p>` },
+  shuffle: { t: 'Shuffle', h: `
+    <p>7 shuffles. The dots show one beat of 4 steps, divided into n parts; the lit dots are where the steps fall. Shuffle 1 is straight.</p>
+    <p>The positions come from the shuffle display in the manual, which calls itself a visual approximation. The preview uses the same positions. The exact timing of the module has not been measured.</p>
+    <p>Timing (Trip, Shake, Push, Clave) changes the shuffle on the module but is not in the preview.</p>` },
+  timing: { t: 'Timing', h: `
+    <ul>
+      <li><b>Trip:</b> n-tuplets.</li>
+      <li><b>Shake:</b> 8th-note swing.</li>
+      <li><b>Push:</b> leaves room before the downbeats.</li>
+      <li><b>Clave:</b> 3:3:2 stays fixed.</li>
+    </ul>
+    <p>The manual does not describe exactly how timing works. It is not in the preview.</p>` },
+  feeling: { t: 'Feeling', h: `
+    <ul>
+      <li><b>Tight:</b> everything together.</li>
+      <li><b>Rolls:</b> Hihat 2 becomes a burst of triggers.</li>
+      <li><b>Flam:</b> kick and snare come slightly later.</li>
+      <li><b>Slop:</b> like Flam, and the hihats follow kick and snare.</li>
+    </ul>
+    <p>The preview approximates this: Flam and Slop delay kick and snare by 12 ms (Slop the hihats by 18 ms), Rolls plays 3 Hihat 2 hits per step.</p>` },
+  linear: { t: 'Linear', h: `
+    <p>Mutes steps so that only one instrument plays at a time. Since firmware 157: Snare &gt; Kick &gt; Hihat 2 &gt; Hihat 1, and Snare &gt; Kick &gt; Perc 2 &gt; Perc 1.</p>
+    <p>The preview still uses the older rule: snare beats kick, and both beat the hihats. Perc 1 and 2 are not muted.</p>` },
+  patterns: { t: 'Patterns and steps', h: `
+    <p>A bank has 24 patterns (PTN0–PTN23) per track. Kick and Snare are 4 bars (64 steps); Hihat 1, Hihat 2, Perc 1 and Perc 2 are 1 bar that loops.</p>
+    <ul>
+      <li>This strip picks the same pattern for all tracks; the strip of a track picks only that track. A dot means the pattern has steps.</li>
+      <li>Click a step to switch it, drag to set or clear several. Keyboard: Tab to a step, Enter.</li>
+      <li><b>Copy</b> and <b>Paste</b> work across tracks. 4 bars into a 1-bar track takes bar 1; 1 bar into a 4-bar track repeats it.</li>
+      <li><b>Bar 1 → 2–4</b> copies the first bar of Kick or Snare to the other bars.</li>
+      <li><kbd>Ctrl/Cmd+Z</kbd> undoes the last change.</li>
+    </ul>` },
+  'file-config': { t: 'MachineConfig.txt', h: `
+    <p>Settings for the whole machine: active pattern banks, clock and MIDI options, and the firmware build. The module reads it when it starts.</p>
+    <p>Switches are 1 (on) or 0 (off) in the file. The editor only changes values; unknown lines stay as they are.</p>` },
+  banks: { t: 'Active pattern banks', h: `
+    <p><code>PATTERNBANK_ACTIVE</code> has 4 groups of 16 bits; the first bit is bank 1. Only active banks are reachable with ◄ Bank ►; inactive banks are skipped.</p>
+    <p>The module ships with banks 1–4 active. Firmware 157 and 160 added factory banks 5 and 6; you may have to activate those yourself.</p>
+    <p>A bank that is active but has no file on the card: check the name, <code>PatternBank</code> plus three digits, <code>.txt</code>, in the root of the card.</p>` },
+  'file-env': { t: 'EnvelopeSettings.txt', h: `
+    <p>The two Env outputs give a tempo-synced 10 V CV that follows shuffle, timing and feeling.</p>
+    <p>On the module: press and release the Subdiv encoder for 2 seconds to enter the ENV options. The upper encoder row (from Kick) sets ENV 1, the lower row (from Perc 1) ENV 2: waveform, clock divider, lower and upper boundary.</p>
+    <p>The plots are sketches of shape and range, not measurements of the output.</p>` },
+  waveform: { t: 'Waveforms', h: () => `
+    <table><tr><th></th><th>Value</th><th>Waveform</th></tr>${WAVEFORMS.map((name, i) =>
+      `<tr><td>${waveIcon(i)}</td><td>${i}</td><td>${esc(name)}</td></tr>`).join('')}</table>
+    <p><b>Stepped:</b> with x4–P2 it alternates between the upper and lower boundary; with :bd–:P2 it holds the velocity.</p>
+    <p>The order follows the manual. The values in the file are inferred.</p>` },
+  clockdiv: { t: 'Clock divider', h: () => `
+    <p>An envelope follows the bar or a beat (x4–1), restarts with a trigger of a track (bd–P2), or does that with the velocity of the trigger (:bd–:P2).</p>
+    <table><tr><th>Display</th><th>Value</th><th>Behaviour</th></tr>${CLOCKDIVS.map((d, i) =>
+      `<tr><td><code>${esc(d.label)}</code></td><td>${i}</td><td>${esc(d.d)}</td></tr>`).join('')}</table>` },
+  range: { t: 'Range', h: `
+    <ul>
+      <li><b>x4 to P2</b> share one range. Upper is the maximum, lower the offset; the envelope moves between the two. Keys: <code>ENVn_LFO_VEL</code> and <code>ENVn_LFO_LOW_VEL</code>.</li>
+      <li><b>:bd to :P2</b> have a range per instrument. Upper is the accented velocity, lower the non-accented one; the envelope moves between zero and that value. Keys: <code>ENVn_KICK_VEL</code>, <code>ENVn_KICK_LOW_VEL</code> and so on.</li>
+      <li>0–127. On the module one LED is 8 steps.</li>
+    </ul>
+    <p>The group that the clock divider does not use is dimmed.</p>` },
+  'file-state': { t: 'MachineState.txt', h: `
+    <p>The module saves its current state here when you stop the sequencer, and starts with it. Edit it to choose how the module starts.</p>
+    <p>When you play and stop on the module, it overwrites this file. <code>WRITE_MACHINE_STATE</code> in MachineConfig.txt probably turns that off, so the module always starts with your state. That setting is not documented; check it on your module.</p>` },
+  inferred: { t: 'Inferred values', h: `
+    <p>The manual describes the settings, but not the numbers in the files. The editor assumes that values count from 0, in the order of the manual and the panel. Pattern numbers (0 is PTN0) and MIDI channels (0 is channel 1) are known to work that way.</p>
+    <p>To check a value: set it here, save, start the module and compare with the display. For example, set ENV 1 to Ramp down and check that the first waveform is lit in the ENV options.</p>` },
+};
+
+function infoBtn(key, label) {
+  return el('button', { class: 'info', type: 'button', 'data-info': key, 'aria-label': `About ${label}`, 'aria-expanded': 'false', text: 'i' });
 }
+
+const tip = el('div', { class: 'tip', id: 'tip', role: 'dialog', tabindex: '-1', hidden: '' });
+document.body.append(tip);
+let tipBtn = null;
+
+function closeTip(refocus) {
+  if (!tipBtn) return;
+  tip.hidden = true;
+  tipBtn.setAttribute('aria-expanded', 'false');
+  if (refocus) tipBtn.focus();
+  tipBtn = null;
+}
+function openTip(btn, byKeyboard) {
+  const it = INFO[btn.dataset.info];
+  if (!it) return;
+  closeTip();
+  tip.innerHTML = `<h4>${esc(it.t)}</h4>` + (typeof it.h === 'function' ? it.h() : it.h);
+  tip.setAttribute('aria-label', it.t);
+  tip.hidden = false;
+  tipBtn = btn;
+  btn.setAttribute('aria-expanded', 'true');
+  btn.setAttribute('aria-controls', 'tip');
+  // Below the button, or above it when there is no room; always inside the viewport.
+  const r = btn.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth;
+  const x = Math.max(12, Math.min(r.left - 12, vw - tip.offsetWidth - 12));
+  let y = r.bottom + 6;
+  if (y + tip.offsetHeight > innerHeight - 8 && r.top - tip.offsetHeight - 6 > 8) y = r.top - tip.offsetHeight - 6;
+  tip.style.left = x + scrollX + 'px';
+  tip.style.top = y + scrollY + 'px';
+  if (byKeyboard) tip.focus();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-info]');
+  if (b) { b === tipBtn ? closeTip() : openTip(b, e.detail === 0); return; }
+  if (tipBtn && !tip.contains(e.target)) closeTip();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && tipBtn) closeTip(true); });
+window.addEventListener('resize', () => closeTip());
 
 // ---------- files ----------
 const PICKER_TYPES = [{ description: 'Stolperbeats files', accept: { 'text/plain': ['.txt'] } }];
@@ -1749,7 +1776,6 @@ window.addEventListener('beforeunload', e => {
 buildTransport();
 buildAllStrip();
 buildTracks();
-buildGuide();
 renderTransport();
 renderAll();
 updateFileInfo();
