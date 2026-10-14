@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stolperbeats editor</title>
+<title>Stolperbeats Pattern Programmer</title>
 <meta name="description" content="Edit the SD card of the Stolperbeats drum trigger sequencer: pattern banks, envelopes, config and default state. Runs in your browser.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='4' fill='%230f0f0f'/%3E%3Ccircle cx='4' cy='5' r='2.1' fill='%23e5332a'/%3E%3Ccircle cx='9.3' cy='5' r='2.1' fill='%233a3a3a'/%3E%3Ccircle cx='12.7' cy='5' r='2.1' fill='%233a3a3a'/%3E%3Ccircle cx='18' cy='5' r='2.1' fill='%23e5332a'/%3E%3Ccircle cx='4' cy='11' r='2.1' fill='%233a3a3a'/%3E%3Ccircle cx='9.3' cy='11' r='2.1' fill='%233a3a3a'/%3E%3Ccircle cx='12.7' cy='11' r='2.1' fill='%23f27d16'/%3E%3Ccircle cx='18' cy='11' r='2.1' fill='%233a3a3a'/%3E%3Ccircle cx='4' cy='17' r='2.1' fill='%23f4f4f4'/%3E%3Ccircle cx='9.3' cy='17' r='2.1' fill='%23f8c700'/%3E%3Ccircle cx='12.7' cy='17' r='2.1' fill='%23f4f4f4'/%3E%3Ccircle cx='18' cy='17' r='2.1' fill='%23f8c700'/%3E%3C/svg%3E">
 <style>
@@ -236,6 +236,8 @@ button.tag{background:none;font:inherit;font-size:10px;line-height:inherit}
 .logo{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
 .logo:hover span{color:var(--text)}
 .logo svg{flex:none}
+.logo span{white-space:nowrap}
+@media (max-width:520px){ .top h1{font-size:18px} .logo{gap:8px} }
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:32px;align-items:center;margin:8px 0 32px}
 .hero h2{font-size:32px;line-height:1.12;letter-spacing:-.025em;margin:0 0 14px}
 .lead{font-size:16px;line-height:1.5;color:#d4d4d4;margin:0 0 10px}
@@ -259,11 +261,11 @@ button.tag{background:none;font:inherit;font-size:10px;line-height:inherit}
 <body>
 <div class="wrap">
   <header class="top">
-    <h1><a class="logo" href="#" title="Start page and guide"><svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
+    <h1><a class="logo" href="#" title="Start page"><svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
       <circle cx="2.5" cy="2.5" r="2.2" style="fill:var(--kick)"/><circle cx="8.2" cy="2.5" r="2.2" style="fill:var(--off)"/><circle cx="13.8" cy="2.5" r="2.2" style="fill:var(--off)"/><circle cx="19.5" cy="2.5" r="2.2" style="fill:var(--kick)"/>
       <circle cx="2.5" cy="8" r="2.2" style="fill:var(--off)"/><circle cx="8.2" cy="8" r="2.2" style="fill:var(--off)"/><circle cx="13.8" cy="8" r="2.2" style="fill:var(--snare)"/><circle cx="19.5" cy="8" r="2.2" style="fill:var(--off)"/>
       <circle cx="2.5" cy="13.5" r="2.2" style="fill:var(--hh1)"/><circle cx="8.2" cy="13.5" r="2.2" style="fill:var(--hh2)"/><circle cx="13.8" cy="13.5" r="2.2" style="fill:var(--hh1)"/><circle cx="19.5" cy="13.5" r="2.2" style="fill:var(--hh2)"/>
-    </svg>Stolperbeats <span>editor</span></a></h1>
+    </svg>Stolperbeats <span>Pattern Programmer</span></a></h1>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button role="tab" id="tab-patterns" data-tab="patterns" aria-controls="panel-patterns">Patterns</button>
       <button role="tab" id="tab-env" data-tab="env" aria-controls="panel-env">Envelopes</button>
@@ -278,8 +280,9 @@ button.tag{background:none;font:inherit;font-size:10px;line-height:inherit}
   <section class="panel" id="panel-home" aria-label="Start page">
     <div class="hero">
       <div class="hero-text">
-        <h2>Edit the SD card of your Stolperbeats</h2>
-        <p class="lead">Pattern banks, envelopes, config and default state of the Making Sound Machines drum trigger sequencer. Open the files from the card, change them, listen to your patterns and save them back.</p>
+        <h2>Stolperbeats Pattern Programmer</h2>
+        <p class="lead">Hey, I made an app for my Stolperbeats and I'd like to share it. At first I had some banks generated as .txt files, but that never quite gives you enough control over the patterns. With no official web editor around, I built one myself.</p>
+        <p class="lead">Only after building it did I find out I'm not the only one: there are plenty of other vibe-coded apps that do the same. But it's made now, so you might as well enjoy it.</p>
         <p class="muted">Runs in your browser. Nothing is uploaded and the page loads nothing from the internet.</p>
         <div class="hero-actions">
           <button class="big" data-act="open">Open files</button>

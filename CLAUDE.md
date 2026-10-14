@@ -1,4 +1,4 @@
-# Stolperbeats editor
+# Stolperbeats Pattern Programmer
 
 Lokale editor voor de SD-kaart van de Stolperbeats (Making Sound Machines, Eurorack drum trigger sequencer): pattern banks, `MachineConfig.txt`, `EnvelopeSettings.txt` en `MachineState.txt`. Bestanden openen, bewerken, patronen beluisteren, en terugschrijven naar de kaart.
 
