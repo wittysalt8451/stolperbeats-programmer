@@ -1,4 +1,4 @@
-// Genereert een volledige bank in exact het formaat van PatternBank004.txt (Patchstorage).
+// Generates a full bank in the exact format of PatternBank004.txt (Patchstorage).
 import fs from 'fs';
 import path from 'path';
 const dir = path.join(path.dirname(new URL(import.meta.url).pathname), 'fixtures');
@@ -8,4 +8,4 @@ const r = () => Array.from({ length: 16 }, () => (Math.random() < 0.3 ? '1' : '0
 const s = T.map(([id, n]) => Array.from({ length: 24 }, (_, i) =>
   `${id} > PTN${i}: ${Array.from({ length: n }, r).join(', ')};`).join('\n')).join('\n\n') + '\n';
 fs.writeFileSync(path.join(dir, 'PatternBank004.txt'), s);
-console.log('fixture geschreven:', path.join(dir, 'PatternBank004.txt'));
+console.log('fixture written:', path.join(dir, 'PatternBank004.txt'));
