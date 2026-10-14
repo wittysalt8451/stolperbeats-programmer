@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 HERE=pathlib.Path(__file__).resolve().parent
 S=str(HERE/'fixtures')
 OUT=str(HERE/'out'); os.makedirs(OUT, exist_ok=True)
-url=(HERE.parent/'stolperbeats-bank-editor.html').as_uri()
+url=(HERE.parent/'index.html').as_uri()
 with sync_playwright() as p:
     b=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required'])
     pg=b.new_page(viewport={'width':1280,'height':900}, accept_downloads=True)

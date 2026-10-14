@@ -6,10 +6,11 @@ Eerst voor eigen gebruik. Delen of een platform komt later, misschien.
 
 ## Uitgangspunten
 
-- **Eén zelfstandig HTML-bestand** (`stolperbeats-bank-editor.html`). Geen build-stap en geen framework, zolang dat volstaat.
-- **Geen externe bronnen.** Geen CDN's, Google Fonts of analytics. Ook geen hosting op Amerikaanse infrastructuur (Cloudflare, Vercel, Netlify, Supabase, AWS en dergelijke). GitHub voor code is oké. Gewone links naar de handleiding mogen.
-  - Hosting later: Bunny.net (SI) voor statisch, of Hetzner (DE/FI) met Caddy en PocketBase als er een backend nodig is.
-- **De frontend is altijd in het Engels.** Dat geldt voor alle UI-teksten, meldingen, de Guide-tab en het codecommentaar in het HTML-bestand. Gebruik de termen van het paneel en de handleiding (Kick, Shuffle, Feeling, Linear). Met Bart communiceer je in het Nederlands.
+- **Eén zelfstandig HTML-bestand** (`index.html`). Geen build-stap en geen framework, zolang dat volstaat.
+- **Geen externe bronnen.** Geen CDN's, Google Fonts of analytics. De pagina laadt niets van internet. Gewone links naar de handleiding mogen.
+- **Hosting:** GitHub Pages vanaf `main`, uit de root van de repo. Bart heeft daar in oktober 2026 bewust voor gekozen. `.nojekyll` zorgt dat Pages de bestanden ongewijzigd serveert.
+  - Mocht er ooit een backend nodig zijn, dan liever geen Amerikaanse infrastructuur (Cloudflare, Vercel, Netlify, Supabase, AWS en dergelijke), maar Hetzner (DE/FI) met Caddy en PocketBase. Bunny.net (SI) is het alternatief voor statische hosting.
+- **De frontend is altijd in het Engels.** Dat geldt voor alle UI-teksten, meldingen, de uitleg op de startpagina en het codecommentaar in het HTML-bestand. Gebruik de termen van het paneel en de handleiding (Kick, Shuffle, Feeling, Linear). Met Bart communiceer je in het Nederlands.
 - Communicatie: nuchter, direct en kort. Geen marketingtaal.
 
 ## Bestanden op de SD-kaart
@@ -126,9 +127,9 @@ Bronnen:
 
 ## Code
 
-- **Bestand:** `stolperbeats-bank-editor.html`, met in volgorde CSS, markup en script.
-- **Startpagina:** zonder hash in de URL kom je op de startpagina (`#panel-home`). Je komt er ook terug door op het logo te klikken. De pagina heeft een hero met een foto van de module, een Open-knop en links naar de tabs, met daaronder de volledige uitleg (de vroegere Guide-tab). `buildGuide()` vult de tabellen daarin vanuit de schema's.
-  - De foto is © Making Sound Machines en staat als base64-JPEG in het laatste `<script>`-blok. Lees het bestand daarom met offset/limit, want die regel is ongeveer 125 KB lang.
+- **Bestand:** `index.html`, met in volgorde CSS, markup en script.
+- **Startpagina:** zonder hash in de URL kom je op de startpagina (`#panel-home`). Je komt er ook terug door op het logo te klikken. De pagina heeft een hero met een foto van de module, een Open-knop en links naar de tabs, met daaronder de volledige uitleg. `buildGuide()` vult de tabellen daarin vanuit de schema's.
+  - De foto staat als base64-JPEG in het laatste `<script>`-blok. Lees het bestand daarom met offset/limit, want die regel is ongeveer 225 KB lang. Het bronbestand is `images/stolperbeats.png`. Na een wijziging maak je opnieuw een JPEG: `sips -Z 760 -s format jpeg -s formatOptions 70`, daarna base64.
 - **Tabs, in deze volgorde:** Patterns, Envelopes, Config en Default state. Intern heten ze `patterns`, `env`, `config` en `state`. De hash in de URL kiest de tab (`#env`).
   - Elk bestand heeft een eigen tab met Open, Save en Download.
   - Open en drag & drop accepteren meerdere bestanden. `fileKind()` stuurt elk bestand naar de juiste tab.
@@ -164,7 +165,6 @@ Playwright staat niet globaal geïnstalleerd. Installeer het in een venv: `pip i
 
 - De volgorde van de waarden is niet bevestigd voor de velden die als *inferred* gemarkeerd zijn, met `SYNCOUT` als onbekendste. Controleer ze op de module, of vraag het Making Sound Machines (post@makingsoundmachines.com).
 - `WRITE_MACHINE_STATE` en `WRAP_PATTERN_ENCODER` zijn niet gedocumenteerd.
-- De foto op de startpagina komt van Making Sound Machines. Vraag hun toestemming voordat de pagina publiek gehost wordt, of vervang de foto.
 - `PatternBank006.txt` op Barts kaart is met de oude editor gemaakt en heeft LF-regeleinden. De andere bestanden hebben CRLF. Nog niet bekend of de module LF leest.
 
 ## Backlog (globaal, op volgorde)

@@ -1,5 +1,5 @@
 import fs from 'fs';
-const html = fs.readFileSync(new URL('../stolperbeats-bank-editor.html', import.meta.url),'utf8');
+const html = fs.readFileSync(new URL('../index.html', import.meta.url),'utf8');
 const core = html.split('// @core-start')[1].split('// @core-end')[0];
 const api = new Function(core + '; return {TRACKS,parseBank,serializeBank,emptyBank,bankNumFromName,nameFromBankNum,hitsAt,SHUFFLES,parseSettings,serializeSettings,getSetting,setSetting,parseBits,formatBits,fileKind};')();
 const {TRACKS,parseBank,serializeBank,bankNumFromName,nameFromBankNum,hitsAt} = api;
